@@ -614,8 +614,10 @@
                 localStorage.setItem('userData', JSON.stringify(userData));
                 
                 alert('Login successful! Redirecting to dashboard...');
-                // Later we'll redirect to dashboard.html
-                // window.location.href = 'dashboard.html';
+                // Redirect to dashboard after 1 second
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 1000);
             } else {
                 alert('Please fill in all fields');
             }
