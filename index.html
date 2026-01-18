@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TradeMind AI - Login</title>
+    <style>
+        /* CSS Custom Properties - These are like variables for consistent theming */
+        :root {
+            --primary-dark: #0a0a0a;
+            --secondary-dark: #1a1a2e;
+            --accent-blue: #16213e;
+            --bright-blue: #0f3460;
+            --neon-blue: #00d4ff;
+            --text-primary: #ffffff;
+            --text-secondary: #b3b3b3;
+        }
+
+        /* Reset and base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, var(--primary-dark), var(--secondary-dark));
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        /* Animated background particles */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: var(--neon-blue);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+            opacity: 0.7;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        /* AI Robot Animations - Each Robot is Unique */
+        .robot {
+            position: absolute;
+            opacity: 0.7;
+            z-index: -1;
+        }
+
+        /* ROBOT 1 - Happy Profitable Trader */
+        .robot-1 {
+            top: 12%;
+            left: 8%;
+            animation: happyBounce 3s ease-in-out infinite;
+        }
+
+        @keyframes happyBounce {
+            0%, 100% { transform: translateY(0px) scale(1); }
+            50% { transform: translateY(-8px) scale(1.05); }
+        }
+
+        .robot-1 .robot-body {
+            width: 50px;
+            height: 70px;
+            background: linear-gradient(135deg, #00ff88, #00cc66);
+            border-radius: 12px;
+            position: relative;
+            border: 2px solid rgba(0, 255, 136, 0.4);
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+        }
+
+        .robot-1 .robot-head {
+            width: 35px;
+            height: 35px;
+            background: linear-gradient(135deg, #00ff88, #00aa55);
+            border-radius: 50%;
+            position: absolute;
+            top: -18px;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 2px solid rgba(0, 255, 136, 0.5);
+        }
+
+        .robot-1 .robot-eyes {
+            width: 6px;
+            height: 6px;
+            background: #ffffff;
+            border-radius: 50%;
+            position: absolute;
+            top: 10px;
+            animation: happyBlink 2s ease-in-out infinite;
+        }
+
+        .robot-1 .robot-eyes.left { left: 8px; }
+        .robot-1 .robot-eyes.right { right: 8px; }
+
+        @keyframes happyBlink {
+            0%, 85%, 100% { opacity: 1; }
+            90% { opacity: 0; }
+        }
+
+        /* ROBOT 2 - Angry Loss-Making Trader */
+        .robot-2 {
+            top: 55%;
+            right: 10%;
+            animation: angryShake 2s ease-in-out infinite;
+        }
+
+        @keyframes angryShake {
+            0%, 100% { transform: translateX(0px) rotate(0deg); }
+            25% { transform: translateX(-3px) rotate(-2deg); }
+            75% { transform: translateX(3px) rotate(2deg); }
+        }
+
+        .robot-2 .robot-body {
+            width: 55px;
+            height: 75px;
+            background: linear-gradient(135deg, #ff4444, #cc0000);
+            border-radius: 10px;
+            position: relative;
+            border: 2px solid rgba(255, 68, 68, 0.4);
+            box-shadow: 0 0 20px rgba(255, 68, 68, 0.3);
+            transform: scaleX(-1);
+        }
+
+        .robot-2 .robot-head {
+            width: 38px;
+            height: 38px;
+            background: linear-gradient(135deg, #ff4444, #990000);
+            border-radius: 50%;
+            position: absolute;
+            top: -19px;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 2px solid rgba(255, 68, 68, 0.5);
+        }
+
+        .robot-2 .robot-eyes {
+            width: 7px;
+            height: 4px;
+            background: #ffff00;
+            border-radius: 0;
+            position: absolute;
+            top: 12px;
+            animation: angryGlow 1s ease-in-out infinite;
+        }
+
+        .robot-2 .robot-eyes.left { left: 9px; transform: rotate(-15deg); }
+        .robot-2 .robot-eyes.right { right: 9px; transform: rotate(15deg); }
+
+        @keyframes angryGlow {
+            0%, 100% { opacity: 1; box-shadow: 0 0 5px #ffff00; }
+            50% { opacity: 0.7; box-shadow: 0 0 10px #ffff00; }
+        }
+
+        /* ROBOT 3 - Focused Analyst */
+        .robot-3 {
+            bottom: 18%;
+            left: 15%;
+            animation: focusedWork 4s ease-in-out infinite;
+        }
+
+        @keyframes focusedWork {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.02) rotate(1deg); }
+        }
+
+        .robot-3 .robot-body {
+            width: 48px;
+            height: 68px;
+            background: linear-gradient(135deg, #4444ff, #0000cc);
+            border-radius: 8px;
+            position: relative;
+            border: 2px solid rgba(68, 68, 255, 0.4);
+            box-shadow: 0 0 15px rgba(68, 68, 255, 0.3);
+        }
+
+        .robot-3 .robot-head {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #4444ff, #000099);
+            border-radius: 50%;
+            position: absolute;
+            top: -16px;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 2px solid rgba(68, 68, 255, 0.5);
+        }
+
+        .robot-3 .robot-eyes {
+            width: 5px;
+            height: 5px;
+            background: #00ffff;
+            border-radius: 50%;
+            position: absolute;
+            top: 9px;
+            animation: focusedBlink 4s ease-in-out infinite;
+        }
+
+        .robot-3 .robot-eyes.left { left: 7px; }
+        .robot-3 .robot-eyes.right { right: 7px; }
+
+        @keyframes focusedBlink {
+            0%, 95%, 100% { opacity: 1; }
+            97% { opacity: 0; }
+        }
+
+        /* Desks/Tables for robots */
+        .desk {
+            position: absolute;
+            background: rgba(26, 26, 46, 0.8);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 8px;
+        }
+
+        .desk-1 {
+            width: 80px;
+            height: 15px;
+            top: 25%;
+            left: 5%;
+            background: rgba(0, 255, 136, 0.1);
+        }
+
+        .desk-2 {
+            width: 85px;
+            height: 15px;
+            top: 70%;
+            right: 7%;
+            background: rgba(255, 68, 68, 0.1);
+        }
+
+        .desk-3 {
+            width: 75px;
+            height: 15px;
+            bottom: 35%;
+            left: 12%;
+            background: rgba(68, 68, 255, 0.1);
+        }
+
+        /* Laptops on desks */
+        .laptop {
+            position: absolute;
+            width: 25px;
+            height: 18px;
+            background: rgba(20, 20, 40, 0.9);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 3px;
+            top: -9px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .laptop-screen {
+            width: 20px;
+            height: 12px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid rgba(0, 212, 255, 0.4);
+            border-radius: 2px;
+            position: absolute;
+            top: 1px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        /* Different screen content for each laptop */
+        .screen-content {
+            position: absolute;
+            width: 18px;
+            height: 10px;
+            top: 1px;
+            left: 1px;
+            animation: screenFlicker 2s ease-in-out infinite;
+        }
+
+        .screen-content.profit {
+            background: linear-gradient(45deg, #00ff88, #00cc66);
+            opacity: 0.8;
+        }
+
+        .screen-content.loss {
+            background: linear-gradient(45deg, #ff4444, #cc0000);
+            opacity: 0.8;
+        }
+
+        .screen-content.analysis {
+            background: linear-gradient(45deg, #4444ff, #0000cc);
+            opacity: 0.8;
+        }
+
+        @keyframes screenFlicker {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 1; }
+        }
+
+        /* Work displays with different emotions */
+        .work-display {
+            position: absolute;
+            border-radius: 5px;
+            padding: 6px 8px;
+            font-size: 9px;
+            white-space: nowrap;
+            animation: dataFlow 3s ease-in-out infinite;
+            font-weight: bold;
+        }
+
+        .work-display.profit {
+            background: rgba(0, 255, 136, 0.2);
+            border: 1px solid rgba(0, 255, 136, 0.4);
+            color: #00ff88;
+            top: -35px;
+            left: 60px;
+        }
+
+        .work-display.loss {
+            background: rgba(255, 68, 68, 0.2);
+            border: 1px solid rgba(255, 68, 68, 0.4);
+            color: #ff4444;
+            top: -35px;
+            right: 60px;
+        }
+
+        .work-display.analysis {
+            background: rgba(68, 68, 255, 0.2);
+            border: 1px solid rgba(68, 68, 255, 0.4);
+            color: #4444ff;
+            bottom: -35px;
+            left: 60px;
+        }
+
+        @keyframes dataFlow {
+            0%, 100% { opacity: 0.8; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.05); }
+        }
+
+        /* Main container */
+        .login-container {
+            background: rgba(26, 26, 46, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 20px;
+            padding: 40px;
+            width: 400px;
+            max-width: 90vw;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            animation: slideIn 1s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Logo and title */
+        .logo-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: var(--neon-blue);
+            text-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 0.9em;
+            letter-spacing: 1px;
+        }
+
+        /* Form styling */
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 15px;
+            background: rgba(15, 52, 96, 0.3);
+            border: 2px solid rgba(0, 212, 255, 0.3);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+            background: rgba(15, 52, 96, 0.5);
+        }
+
+        .form-group input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        /* Login button */
+        .login-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, var(--bright-blue), var(--neon-blue));
+            border: none;
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.4);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Links */
+        .links {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .links a {
+            color: var(--neon-blue);
+            text-decoration: none;
+            font-size: 14px;
+            margin: 0 10px;
+            transition: color 0.3s ease;
+        }
+
+        .links a:hover {
+            color: var(--text-primary);
+        }
+
+        /* Responsive design */
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 30px 20px;
+            }
+            
+            .logo {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated background -->
+    <div class="bg-animation" id="bgAnimation"></div>
+
+    <!-- AI Robots with different personalities and setups -->
+    
+    <!-- Desk 1 - Happy Profitable Trader -->
+    <div class="desk desk-1">
+        <div class="laptop">
+            <div class="laptop-screen">
+                <div class="screen-content profit"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Robot 1 - Happy because making profits -->
+    <div class="robot robot-1">
+        <div class="robot-body">
+            <div class="robot-head">
+                <div class="robot-eyes left"></div>
+                <div class="robot-eyes right"></div>
+            </div>
+        </div>
+        <div class="work-display profit">+$2,450 Today! 📈</div>
+    </div>
+
+    <!-- Desk 2 - Angry Loss-Making Trader -->
+    <div class="desk desk-2">
+        <div class="laptop">
+            <div class="laptop-screen">
+                <div class="screen-content loss"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Robot 2 - Angry because losing money -->
+    <div class="robot robot-2">
+        <div class="robot-body">
+            <div class="robot-head">
+                <div class="robot-eyes left"></div>
+                <div class="robot-eyes right"></div>
+            </div>
+        </div>
+        <div class="work-display loss">-$1,200 Loss! 😡</div>
+    </div>
+
+    <!-- Desk 3 - Focused Analyst -->
+    <div class="desk desk-3">
+        <div class="laptop">
+            <div class="laptop-screen">
+                <div class="screen-content analysis"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Robot 3 - Focused on deep analysis -->
+    <div class="robot robot-3">
+        <div class="robot-body">
+            <div class="robot-head">
+                <div class="robot-eyes left"></div>
+                <div class="robot-eyes right"></div>
+            </div>
+        </div>
+        <div class="work-display analysis">Analyzing patterns... 🔍</div>
+    </div>
+
+    <!-- Main login container -->
+    <div class="login-container">
+        <!-- Logo section -->
+        <div class="logo-section">
+            <div class="logo">TradeMind</div>
+            <div class="subtitle">INTELLIGENT TRADING ASSISTANT</div>
+        </div>
+
+        <!-- Login form -->
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" placeholder="Enter your email" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Enter your password" required>
+            </div>
+
+            <button type="submit" class="login-btn">LOGIN</button>
+        </form>
+
+        <!-- Additional links -->
+        <div class="links">
+            <a href="#" id="forgotPassword">Forgot Password?</a>
+            <a href="signup.html">Sign Up</a>
+        </div>
+    </div>
+
+    <script>
+        // Create floating particles animation
+        function createParticles() {
+            const bgAnimation = document.getElementById('bgAnimation');
+            const particleCount = 50;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                
+                bgAnimation.appendChild(particle);
+            }
+        }
+
+        // Form submission handling
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            if (email && password) {
+                // Store login status in localStorage
+                const userData = {
+                    email: email,
+                    loginTime: new Date().toISOString()
+                };
+                localStorage.setItem('isLoggedIn', 'true');
+                localStorage.setItem('userData', JSON.stringify(userData));
+                
+                alert('Login successful! Redirecting to dashboard...');
+                // Later we'll redirect to dashboard.html
+                // window.location.href = 'dashboard.html';
+            } else {
+                alert('Please fill in all fields');
+            }
+        });
+
+        // Forgot password link
+        document.getElementById('forgotPassword').addEventListener('click', function(e) {
+            e.preventDefault();
+            alert('Forgot password functionality coming soon!');
+        });
+
+        // Initialize animations when page loads
+        window.addEventListener('load', function() {
+            createParticles();
+        });
+    </script>
+</body>
+</html>
