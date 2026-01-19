@@ -433,7 +433,7 @@
                         <span class="badge">📊 Active Since 2024</span>
                     </div>
                 </div>
-                <button class="edit-profile-btn" onclick="enableEdit()">✏️ Edit Profile</button>
+                <button class="edit-profile-btn" id="editBtn">✏️ Edit Profile</button>
             </div>
 
             <!-- Profile Grid -->
@@ -593,50 +593,74 @@
     </div>
 
     <script>
-        // Load user data
-        window.addEventListener('load', function() {
-            const userData = JSON.parse(localStorage.getItem('userData') || '{}');
-            if (userData.email) {
-                document.getElementById('profileEmail').textContent = userData.email;
-                document.getElementById('email').value = userData.email;
-                
-                const userName = userData.email.split('@')[0];
-                document.getElementById('profileName').textContent = userName.charAt(0).toUpperCase() + userName.slice(1);
+        const fields = ["firstName", "lastName", "email", "phone", "experience", "bio"];
+    
+        // Load profile data
+        window.addEventListener('load', function () {
+            const saved = JSON.parse(localStorage.getItem("profileData") || "{}");
+    
+            fields.forEach(id => {
+                if (saved[id]) {
+                    document.getElementById(id).value = saved[id];
+                }
+            });
+    
+            if (saved.firstName && saved.lastName) {
+                document.getElementById("profileName").textContent =
+                    saved.firstName + " " + saved.lastName;
+            }
+    
+            if (saved.email) {
+                document.getElementById("profileEmail").textContent = saved.email;
             }
         });
-
-        // Toggle switch functionality
-        function toggleSwitch(element) {
-            element.classList.toggle('active');
-        }
-
+    
         // Enable edit mode
         function enableEdit() {
             const inputs = document.querySelectorAll('#profileForm input, #profileForm select, #profileForm textarea');
             inputs.forEach(input => input.disabled = false);
             document.getElementById('saveBtn').style.display = 'block';
         }
-
-        // Save profile changes
-        document.getElementById('profileForm').addEventListener('submit', function(e) {
+    
+        // Save profile
+        document.getElementById('profileForm').addEventListener('submit', function (e) {
             e.preventDefault();
-            
-            const inputs = document.querySelectorAll('#profileForm input, #profileForm select, #profileForm textarea');
-            inputs.forEach(input => input.disabled = true);
+    
+            const data = {};
+            fields.forEach(id => {
+                const el = document.getElementById(id);
+                data[id] = el.value;
+                el.disabled = true;
+            });
+    
+            localStorage.setItem("profileData", JSON.stringify(data));
+    
+            document.getElementById("profileName").textContent =
+                data.firstName + " " + data.lastName;
+    
+            document.getElementById("profileEmail").textContent = data.email;
+    
             document.getElementById('saveBtn').style.display = 'none';
-            
-            alert('Profile updated successfully! ✅');
+    
+            alert("Profile updated successfully! ✅");
         });
-
-        // Logout functionality
-        document.getElementById('logoutBtn').addEventListener('click', function(e) {
+    
+       
+        document.getElementById("editBtn").addEventListener("click", enableEdit);
+       //functionality for toggle switches
+        function toggleSwitch(element) {
+            element.classList.toggle('active');
+        }
+    
+        document.getElementById('logoutBtn').addEventListener('click', function (e) {
             e.preventDefault();
             if (confirm('Are you sure you want to logout?')) {
                 localStorage.removeItem('isLoggedIn');
                 localStorage.removeItem('userData');
+                localStorage.removeItem('profileData');
                 window.location.href = 'index.html';
             }
         });
-    </script>
+    </script>    
 </body>
 </html>
