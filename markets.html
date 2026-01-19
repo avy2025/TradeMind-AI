@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TradeMind AI - Markets</title>
     <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
     <style>
         body {
             background: var(--primary-dark);
@@ -16,7 +17,6 @@
             min-height: 100vh;
         }
 
-        /* Sidebar */
         .sidebar {
             width: 250px;
             background: rgba(26, 26, 46, 0.95);
@@ -64,14 +64,12 @@
             font-size: 1.2em;
         }
 
-        /* Main Content */
         .main-content {
             flex: 1;
             margin-left: 250px;
             padding: 30px;
         }
 
-        /* Page Header */
         .page-header {
             display: flex;
             justify-content: space-between;
@@ -124,7 +122,6 @@
             box-shadow: 0 5px 15px rgba(0, 212, 255, 0.4);
         }
 
-        /* Market Overview Cards */
         .market-overview {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -175,7 +172,6 @@
             color: var(--warning-red);
         }
 
-        /* Tabs */
         .tabs {
             display: flex;
             gap: 10px;
@@ -203,109 +199,6 @@
             border-bottom-color: var(--neon-blue);
         }
 
-        /* Stock Table */
-        .stocks-section {
-            background: rgba(26, 26, 46, 0.6);
-            border: 1px solid rgba(0, 212, 255, 0.2);
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 30px;
-        }
-
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .section-title {
-            color: var(--text-primary);
-            font-size: 1.3em;
-            font-weight: 600;
-        }
-
-        .filter-buttons {
-            display: flex;
-            gap: 10px;
-        }
-
-        .filter-btn {
-            padding: 8px 15px;
-            background: rgba(15, 52, 96, 0.3);
-            border: 1px solid rgba(0, 212, 255, 0.3);
-            border-radius: 6px;
-            color: var(--text-secondary);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 0.85em;
-        }
-
-        .filter-btn:hover, .filter-btn.active {
-            background: rgba(0, 212, 255, 0.2);
-            color: var(--neon-blue);
-            border-color: var(--neon-blue);
-        }
-
-        .stocks-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .stocks-table thead {
-            border-bottom: 2px solid rgba(0, 212, 255, 0.3);
-        }
-
-        .stocks-table th {
-            color: var(--text-secondary);
-            font-size: 0.85em;
-            text-align: left;
-            padding: 15px 12px;
-            font-weight: 600;
-        }
-
-        .stocks-table td {
-            color: var(--text-primary);
-            padding: 15px 12px;
-            border-bottom: 1px solid rgba(0, 212, 255, 0.1);
-        }
-
-        .stocks-table tbody tr {
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-
-        .stocks-table tbody tr:hover {
-            background: rgba(0, 212, 255, 0.05);
-        }
-
-        .stock-symbol {
-            font-weight: bold;
-            font-size: 1.1em;
-        }
-
-        .stock-name {
-            color: var(--text-secondary);
-            font-size: 0.85em;
-        }
-
-        .price-change {
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-weight: 600;
-        }
-
-        .price-change.positive {
-            background: rgba(0, 255, 136, 0.2);
-            color: var(--success-green);
-        }
-
-        .price-change.negative {
-            background: rgba(255, 68, 68, 0.2);
-            color: var(--warning-red);
-        }
-
-        /* Chart Section */
         .chart-container {
             background: rgba(26, 26, 46, 0.6);
             border: 1px solid rgba(0, 212, 255, 0.2);
@@ -364,12 +257,27 @@
         .chart-canvas {
             width: 100%;
             height: 400px;
-            background: rgba(15, 52, 96, 0.2);
             border-radius: 10px;
             position: relative;
+            padding: 10px;
         }
 
-        /* Action Buttons */
+        .price-change {
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-weight: 600;
+        }
+
+        .price-change.positive {
+            background: rgba(0, 255, 136, 0.2);
+            color: var(--success-green);
+        }
+
+        .price-change.negative {
+            background: rgba(255, 68, 68, 0.2);
+            color: var(--warning-red);
+        }
+
         .action-buttons {
             display: flex;
             gap: 15px;
@@ -431,7 +339,69 @@
             border-color: var(--neon-blue);
         }
 
-        /* Live Update Indicator */
+        .stocks-section {
+            background: rgba(26, 26, 46, 0.6);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            color: var(--text-primary);
+            font-size: 1.3em;
+            font-weight: 600;
+        }
+
+        .stocks-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .stocks-table thead {
+            border-bottom: 2px solid rgba(0, 212, 255, 0.3);
+        }
+
+        .stocks-table th {
+            color: var(--text-secondary);
+            font-size: 0.85em;
+            text-align: left;
+            padding: 15px 12px;
+            font-weight: 600;
+        }
+
+        .stocks-table td {
+            color: var(--text-primary);
+            padding: 15px 12px;
+            border-bottom: 1px solid rgba(0, 212, 255, 0.1);
+        }
+
+        .stocks-table tbody tr {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .stocks-table tbody tr:hover {
+            background: rgba(0, 212, 255, 0.05);
+        }
+
+        .stock-symbol {
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .stock-name {
+            color: var(--text-secondary);
+            font-size: 0.85em;
+        }
+
         .live-indicator {
             display: flex;
             align-items: center;
@@ -456,7 +426,6 @@
             font-weight: 600;
         }
 
-        /* Responsive */
         @media (max-width: 768px) {
             .sidebar {
                 transform: translateX(-100%);
@@ -475,20 +444,11 @@
                 max-width: 100%;
                 margin: 0;
             }
-
-            .market-overview {
-                grid-template-columns: 1fr;
-            }
-
-            .stocks-table {
-                font-size: 0.85em;
-            }
         }
     </style>
 </head>
 <body>
     <div class="markets-wrapper">
-        <!-- Sidebar -->
         <aside class="sidebar">
             <div class="sidebar-logo">TradeMind AI</div>
             <ul class="nav-menu">
@@ -543,9 +503,7 @@
             </ul>
         </aside>
 
-        <!-- Main Content -->
         <main class="main-content">
-            <!-- Page Header -->
             <div class="page-header">
                 <h1 class="page-title">📈 Markets</h1>
                 <div class="search-bar">
@@ -558,31 +516,29 @@
                 </div>
             </div>
 
-            <!-- Market Overview -->
             <div class="market-overview">
                 <div class="index-card">
                     <div class="index-name">S&P 500</div>
-                    <div class="index-value" id="sp500Value">4,783.45</div>
-                    <span class="index-change positive" id="sp500Change">↑ +1.24%</span>
+                    <div class="index-value">4,783.45</div>
+                    <span class="index-change positive">↑ +1.24%</span>
                 </div>
                 <div class="index-card">
                     <div class="index-name">Dow Jones</div>
-                    <div class="index-value" id="dowValue">37,404.35</div>
-                    <span class="index-change positive" id="dowChange">↑ +0.82%</span>
+                    <div class="index-value">37,404.35</div>
+                    <span class="index-change positive">↑ +0.82%</span>
                 </div>
                 <div class="index-card">
                     <div class="index-name">NASDAQ</div>
-                    <div class="index-value" id="nasdaqValue">14,963.87</div>
-                    <span class="index-change positive" id="nasdaqChange">↑ +1.68%</span>
+                    <div class="index-value">14,963.87</div>
+                    <span class="index-change positive">↑ +1.68%</span>
                 </div>
                 <div class="index-card">
                     <div class="index-name">Russell 2000</div>
-                    <div class="index-value" id="russellValue">2,027.56</div>
-                    <span class="index-change negative" id="russellChange">↓ -0.43%</span>
+                    <div class="index-value">2,027.56</div>
+                    <span class="index-change negative">↓ -0.43%</span>
                 </div>
             </div>
 
-            <!-- Tabs -->
             <div class="tabs">
                 <button class="tab active" onclick="switchTab('all')">All Stocks</button>
                 <button class="tab" onclick="switchTab('watchlist')">My Watchlist</button>
@@ -591,7 +547,6 @@
                 <button class="tab" onclick="switchTab('losers')">Top Losers</button>
             </div>
 
-            <!-- Chart Section -->
             <div class="chart-container">
                 <div class="chart-header">
                     <div class="chart-info">
@@ -610,7 +565,7 @@
                         <button class="time-btn" onclick="changeTimeRange('ALL')">ALL</button>
                     </div>
                 </div>
-                <div class="chart-canvas" id="chartCanvas">
+                <div class="chart-canvas">
                     <canvas id="priceChart"></canvas>
                 </div>
                 <div class="action-buttons">
@@ -620,17 +575,9 @@
                 </div>
             </div>
 
-            <!-- Stocks Table -->
             <div class="stocks-section">
                 <div class="section-header">
                     <h2 class="section-title">📊 Live Stock Prices</h2>
-                    <div class="filter-buttons">
-                        <button class="filter-btn active">All Sectors</button>
-                        <button class="filter-btn">Technology</button>
-                        <button class="filter-btn">Finance</button>
-                        <button class="filter-btn">Healthcare</button>
-                        <button class="filter-btn">Energy</button>
-                    </div>
                 </div>
                 
                 <table class="stocks-table">
@@ -646,7 +593,6 @@
                         </tr>
                     </thead>
                     <tbody id="stocksTableBody">
-                        <!-- Stock rows will be dynamically inserted here -->
                     </tbody>
                 </table>
             </div>
@@ -654,23 +600,19 @@
     </div>
 
     <script>
-        // Mock stock data - In production, this would come from a real API
+        let priceChart = null;
+        
         const stocksData = [
-            { symbol: 'AAPL', name: 'Apple Inc.', price: 182.50, change: 4.20, changePercent: 2.36, volume: '54.2M', marketCap: '$2.87T', sector: 'Technology' },
-            { symbol: 'MSFT', name: 'Microsoft Corp.', price: 395.20, change: 5.80, changePercent: 1.49, volume: '23.1M', marketCap: '$2.93T', sector: 'Technology' },
-            { symbol: 'GOOGL', name: 'Alphabet Inc.', price: 141.80, change: -1.20, changePercent: -0.84, volume: '18.5M', marketCap: '$1.76T', sector: 'Technology' },
-            { symbol: 'AMZN', name: 'Amazon.com Inc.', price: 178.35, change: 3.15, changePercent: 1.80, volume: '42.8M', marketCap: '$1.84T', sector: 'Technology' },
-            { symbol: 'TSLA', name: 'Tesla Inc.', price: 238.20, change: -7.60, changePercent: -3.09, volume: '98.7M', marketCap: '$755B', sector: 'Automotive' },
-            { symbol: 'NVDA', name: 'NVIDIA Corp.', price: 502.80, change: 17.50, changePercent: 3.61, volume: '35.4M', marketCap: '$1.24T', sector: 'Technology' },
-            { symbol: 'META', name: 'Meta Platforms', price: 468.90, change: 8.45, changePercent: 1.84, volume: '12.3M', marketCap: '$1.19T', sector: 'Technology' },
-            { symbol: 'JPM', name: 'JPMorgan Chase', price: 185.65, change: 2.35, changePercent: 1.28, volume: '8.9M', marketCap: '$543B', sector: 'Finance' },
-            { symbol: 'V', name: 'Visa Inc.', price: 278.90, change: -0.85, changePercent: -0.30, volume: '5.2M', marketCap: '$589B', sector: 'Finance' },
-            { symbol: 'JNJ', name: 'Johnson & Johnson', price: 156.40, change: 1.20, changePercent: 0.77, volume: '6.8M', marketCap: '$385B', sector: 'Healthcare' },
-            { symbol: 'WMT', name: 'Walmart Inc.', price: 168.25, change: 2.10, changePercent: 1.26, volume: '7.1M', marketCap: '$456B', sector: 'Retail' },
-            { symbol: 'XOM', name: 'Exxon Mobil', price: 102.35, change: -1.45, changePercent: -1.40, volume: '15.6M', marketCap: '$417B', sector: 'Energy' }
+            { symbol: 'AAPL', name: 'Apple Inc.', price: 182.50, change: 4.20, changePercent: 2.36, volume: '54.2M', marketCap: '$2.87T' },
+            { symbol: 'MSFT', name: 'Microsoft Corp.', price: 395.20, change: 5.80, changePercent: 1.49, volume: '23.1M', marketCap: '$2.93T' },
+            { symbol: 'GOOGL', name: 'Alphabet Inc.', price: 141.80, change: -1.20, changePercent: -0.84, volume: '18.5M', marketCap: '$1.76T' },
+            { symbol: 'AMZN', name: 'Amazon.com Inc.', price: 178.35, change: 3.15, changePercent: 1.80, volume: '42.8M', marketCap: '$1.84T' },
+            { symbol: 'TSLA', name: 'Tesla Inc.', price: 238.20, change: -7.60, changePercent: -3.09, volume: '98.7M', marketCap: '$755B' },
+            { symbol: 'NVDA', name: 'NVIDIA Corp.', price: 502.80, change: 17.50, changePercent: 3.61, volume: '35.4M', marketCap: '$1.24T' },
+            { symbol: 'META', name: 'Meta Platforms', price: 468.90, change: 8.45, changePercent: 1.84, volume: '12.3M', marketCap: '$1.19T' },
+            { symbol: 'JPM', name: 'JPMorgan Chase', price: 185.65, change: 2.35, changePercent: 1.28, volume: '8.9M', marketCap: '$543B' }
         ];
 
-        // Populate stocks table
         function populateStocksTable(stocks = stocksData) {
             const tbody = document.getElementById('stocksTableBody');
             tbody.innerHTML = '';
@@ -679,124 +621,144 @@
                 const changeClass = stock.change >= 0 ? 'positive' : 'negative';
                 const changeSymbol = stock.change >= 0 ? '↑' : '↓';
                 
-                const row = `
-                    <tr onclick="selectStock('${stock.symbol}', ${stock.price}, ${stock.change}, ${stock.changePercent})">
-                        <td class="stock-symbol">${stock.symbol}</td>
-                        <td>
-                            <div>${stock.name}</div>
-                            <div class="stock-name">${stock.sector}</div>
-                        </td>
-                        <td>$${stock.price.toFixed(2)}</td>
-                        <td style="color: ${stock.change >= 0 ? 'var(--success-green)' : 'var(--warning-red)'}">
-                            ${changeSymbol} $${Math.abs(stock.change).toFixed(2)}
-                        </td>
-                        <td>
-                            <span class="price-change ${changeClass}">
-                                ${changeSymbol} ${Math.abs(stock.changePercent).toFixed(2)}%
-                            </span>
-                        </td>
-                        <td>${stock.volume}</td>
-                        <td>${stock.marketCap}</td>
-                    </tr>
+                const row = document.createElement('tr');
+                row.onclick = function() {
+                    selectStock(stock.symbol, stock.price, stock.change, stock.changePercent);
+                };
+                
+                row.innerHTML = `
+                    <td class="stock-symbol">${stock.symbol}</td>
+                    <td>
+                        <div>${stock.name}</div>
+                        <div class="stock-name">Technology</div>
+                    </td>
+                    <td>$${stock.price.toFixed(2)}</td>
+                    <td style="color: ${stock.change >= 0 ? 'var(--success-green)' : 'var(--warning-red)'}">
+                        ${changeSymbol} $${Math.abs(stock.change).toFixed(2)}
+                    </td>
+                    <td>
+                        <span class="price-change ${changeClass}">
+                            ${changeSymbol} ${Math.abs(stock.changePercent).toFixed(2)}%
+                        </span>
+                    </td>
+                    <td>${stock.volume}</td>
+                    <td>${stock.marketCap}</td>
                 `;
-                tbody.innerHTML += row;
+                
+                tbody.appendChild(row);
             });
         }
 
-        // Select stock and update chart
         function selectStock(symbol, price, change, changePercent) {
             document.getElementById('chartSymbol').textContent = symbol;
-            document.getElementById('chartPrice').textContent = `$${price.toFixed(2)}`;
+            document.getElementById('chartPrice').textContent = '$' + price.toFixed(2);
             
             const changeClass = change >= 0 ? 'positive' : 'negative';
             const changeSymbol = change >= 0 ? '↑' : '↓';
-            document.getElementById('chartChange').className = `price-change ${changeClass}`;
-            document.getElementById('chartChange').textContent = 
-                `${changeSymbol} $${Math.abs(change).toFixed(2)} (${changeSymbol}${Math.abs(changePercent).toFixed(2)}%)`;
+            const chartChangeEl = document.getElementById('chartChange');
+            chartChangeEl.className = 'price-change ' + changeClass;
+            chartChangeEl.textContent = changeSymbol + ' $' + Math.abs(change).toFixed(2) + ' (' + changeSymbol + Math.abs(changePercent).toFixed(2) + '%)';
             
-            // Simulate chart update
-            drawChart();
+            drawChart(symbol, change >= 0);
+            
+            const watchlist = JSON.parse(localStorage.getItem('watchlist') || '[]');
+            const btn = document.getElementById('watchlistBtn');
+            if (watchlist.includes(symbol)) {
+                btn.classList.add('added');
+                btn.textContent = '★ In Watchlist';
+            } else {
+                btn.classList.remove('added');
+                btn.textContent = '⭐ Add to Watchlist';
+            }
         }
 
-        // Simple chart drawing (placeholder - in production use Chart.js or similar)
-        function drawChart() {
+        function drawChart(symbol, isPositive) {
             const canvas = document.getElementById('priceChart');
             const ctx = canvas.getContext('2d');
             
-            // Set canvas size
-            canvas.width = canvas.parentElement.offsetWidth;
-            canvas.height = 400;
+            if (priceChart) {
+                priceChart.destroy();
+            }
             
-            // Clear canvas
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const timeRange = document.querySelector('.time-btn.active')?.textContent || '1M';
+            const dataPoints = 30;
             
-            // Generate random price data for demo
-            const points = 50;
+            const labels = [];
             const data = [];
-            let price = 100;
+            const basePrice = stocksData.find(s => s.symbol === symbol)?.price || 100;
+            let price = basePrice * 0.95;
             
-            for (let i = 0; i < points; i++) {
-                price += (Math.random() - 0.48) * 5;
-                data.push(price);
-            }
-            
-            // Find min and max for scaling
-            const min = Math.min(...data);
-            const max = Math.max(...data);
-            const range = max - min;
-            
-            // Draw grid lines
-            ctx.strokeStyle = 'rgba(0, 212, 255, 0.1)';
-            ctx.lineWidth = 1;
-            for (let i = 0; i <= 5; i++) {
-                const y = (canvas.height / 5) * i;
-                ctx.beginPath();
-                ctx.moveTo(0, y);
-                ctx.lineTo(canvas.width, y);
-                ctx.stroke();
-            }
-            
-            // Draw line chart
-            ctx.strokeStyle = '#00d4ff';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            
-            data.forEach((value, index) => {
-                const x = (canvas.width / (points - 1)) * index;
-                const y = canvas.height - ((value - min) / range) * canvas.height;
+            for (let i = 0; i < dataPoints; i++) {
+                const volatility = 0.02;
+                const trend = isPositive ? 0.001 : -0.001;
+                const randomChange = (Math.random() - 0.5) * 2 * volatility;
+                price = price * (1 + trend + randomChange);
                 
-                if (index === 0) {
-                    ctx.moveTo(x, y);
-                } else {
-                    ctx.lineTo(x, y);
-                }
-            });
-            
-            ctx.stroke();
-            
-            // Fill area under the line
-            ctx.lineTo(canvas.width, canvas.height);
-            ctx.lineTo(0, canvas.height);
-            ctx.closePath();
-            ctx.fillStyle = 'rgba(0, 212, 255, 0.1)';
-            ctx.fill();
-        }
-
-        // Search stock
-        function searchStock() {
-            const searchTerm = document.getElementById('searchInput').value.toUpperCase();
-            if (searchTerm) {
-                const found = stocksData.find(stock => stock.symbol === searchTerm);
-                if (found) {
-                    selectStock(found.symbol, found.price, found.change, found.changePercent);
-                    alert(`Found: ${found.name} (${found.symbol})`);
-                } else {
-                    alert(`Stock "${searchTerm}" not found. Try: AAPL, MSFT, GOOGL, TSLA, etc.`);
-                }
+                data.push(price);
+                labels.push('Day ' + (i + 1));
             }
+            
+            const config = {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: symbol,
+                        data: data,
+                        borderColor: isPositive ? '#00ff88' : '#ff4444',
+                        backgroundColor: isPositive ? 'rgba(0, 255, 136, 0.1)' : 'rgba(255, 68, 68, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 0,
+                        pointHoverRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(26, 26, 46, 0.95)',
+                            titleColor: '#00d4ff',
+                            bodyColor: '#ffffff',
+                            callbacks: {
+                                label: function(context) {
+                                    return '$' + context.parsed.y.toFixed(2);
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                color: 'rgba(0, 212, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#b3b3b3'
+                            }
+                        },
+                        y: {
+                            grid: {
+                                color: 'rgba(0, 212, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#b3b3b3',
+                                callback: function(value) {
+                                    return '$' + value.toFixed(2);
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+            
+            priceChart = new Chart(ctx, config);
         }
 
-        // Switch tabs
         function switchTab(tab) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             event.target.classList.add('active');
@@ -806,24 +768,27 @@
                 const watchlistStocks = stocksData.filter(s => watchlist.includes(s.symbol));
                 populateStocksTable(watchlistStocks);
             } else if (tab === 'gainers') {
-                const gainers = [...stocksData].sort((a, b) => b.changePercent - a.changePercent).slice(0, 10);
+                const gainers = [...stocksData].sort((a, b) => b.changePercent - a.changePercent);
                 populateStocksTable(gainers);
             } else if (tab === 'losers') {
-                const losers = [...stocksData].sort((a, b) => a.changePercent - b.changePercent).slice(0, 10);
+                const losers = [...stocksData].sort((a, b) => a.changePercent - b.changePercent);
                 populateStocksTable(losers);
             } else {
                 populateStocksTable(stocksData);
             }
         }
 
-        // Change time range
         function changeTimeRange(range) {
             document.querySelectorAll('.time-btn').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
-            drawChart();
+            
+            const symbol = document.getElementById('chartSymbol').textContent;
+            const stock = stocksData.find(s => s.symbol === symbol);
+            if (stock) {
+                drawChart(symbol, stock.change >= 0);
+            }
         }
 
-        // Toggle watchlist
         function toggleWatchlist() {
             const btn = document.getElementById('watchlistBtn');
             const symbol = document.getElementById('chartSymbol').textContent;
@@ -833,73 +798,52 @@
                 watchlist = watchlist.filter(s => s !== symbol);
                 btn.classList.remove('added');
                 btn.textContent = '⭐ Add to Watchlist';
-                alert(`${symbol} removed from watchlist`);
+                alert(symbol + ' removed from watchlist');
             } else {
                 watchlist.push(symbol);
                 btn.classList.add('added');
                 btn.textContent = '★ In Watchlist';
-                alert(`${symbol} added to watchlist`);
+                alert(symbol + ' added to watchlist');
             }
             
             localStorage.setItem('watchlist', JSON.stringify(watchlist));
         }
 
-        // Buy stock
         function buyStock() {
             const symbol = document.getElementById('chartSymbol').textContent;
             const price = document.getElementById('chartPrice').textContent;
-            alert(`Buy order placed for ${symbol} at ${price}\n\nThis is a demo - actual trading functionality will be implemented later.`);
+            alert('Buy order placed for ' + symbol + ' at ' + price);
         }
 
-        // Sell stock
         function sellStock() {
             const symbol = document.getElementById('chartSymbol').textContent;
             const price = document.getElementById('chartPrice').textContent;
-            alert(`Sell order placed for ${symbol} at ${price}\n\nThis is a demo - actual trading functionality will be implemented later.`);
+            alert('Sell order placed for ' + symbol + ' at ' + price);
         }
+        function searchStock() {
+            const term = document.getElementById('searchInput').value.trim().toUpperCase();
 
-        // Simulate real-time price updates
-        function updatePrices() {
-            stocksData.forEach(stock => {
-                const randomChange = (Math.random() - 0.5) * 2;
-                stock.price += randomChange;
-                stock.change += randomChange;
-                stock.changePercent = (stock.change / (stock.price - stock.change)) * 100;
-            });
-            
-            populateStocksTable(stocksData);
-            
-            // Update indices
-            const sp500 = document.getElementById('sp500Value');
-            const newValue = parseFloat(sp500.textContent) + (Math.random() - 0.5) * 10;
-            sp500.textContent = newValue.toFixed(2);
-        }
-
-        // Logout
-        document.getElementById('logoutBtn').addEventListener('click', function(e) {
-            e.preventDefault();
-            if (confirm('Are you sure you want to logout?')) {
-                localStorage.removeItem('isLoggedIn');
-                localStorage.removeItem('userData');
-                window.location.href = 'index.html';
+            if (!term) {
+                populateStocksTable(stocksData);
+                return;
             }
-        });
 
-        // Initialize
-        window.addEventListener('load', function() {
+            const results = stocksData.filter(
+                s =>
+                    s.symbol.includes(term) ||
+                    s.name.toUpperCase().includes(term)
+            );
+
+            if (results.length === 0) {
+                alert('No stocks found for: ' + term);
+            } else {
+                populateStocksTable(results);
+            }
+        }
+
+        
+        window.onload = () => {
             populateStocksTable();
-            drawChart();
-            
-            // Update prices every 5 seconds (simulate real-time)
-            setInterval(updatePrices, 5000);
-        });
-
-        // Search on Enter key
-        document.getElementById('searchInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                searchStock();
-            }
-        });
-    </script>
-</body>
-</html>
+            selectStock('AAPL', 182.5, 4.2, 2.36);
+        };
+</script>
