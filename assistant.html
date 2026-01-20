@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TradeMind AI - AI Assistant</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            background: var(--primary-dark);
+            overflow-y: auto;
+        }
+
+        .assistant-wrapper {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background: rgba(26, 26, 46, 0.95);
+            border-right: 1px solid rgba(0, 212, 255, 0.3);
+            padding: 20px;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .sidebar-logo {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: var(--neon-blue);
+            text-align: center;
+            margin-bottom: 30px;
+            text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+        }
+
+        .nav-menu {
+            list-style: none;
+        }
+
+        .nav-item {
+            margin-bottom: 10px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: rgba(0, 212, 255, 0.1);
+            color: var(--neon-blue);
+        }
+
+        .nav-icon {
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 250px;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* Header */
+        .chat-header {
+            background: rgba(26, 26, 46, 0.6);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 15px;
+            padding: 20px 30px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .ai-avatar {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--bright-blue), var(--neon-blue));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            border: 2px solid rgba(0, 212, 255, 0.5);
+        }
+
+        .header-info h1 {
+            color: var(--text-primary);
+            font-size: 1.5em;
+            margin-bottom: 5px;
+        }
+
+        .header-info p {
+            color: var(--text-secondary);
+            font-size: 0.85em;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 15px;
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            border-radius: 20px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--success-green);
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .status-text {
+            color: var(--success-green);
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .quick-action-btn {
+            padding: 10px 20px;
+            background: rgba(15, 52, 96, 0.3);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 20px;
+            color: var(--neon-blue);
+            font-size: 0.85em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .quick-action-btn:hover {
+            background: rgba(0, 212, 255, 0.2);
+            border-color: var(--neon-blue);
+            transform: translateY(-2px);
+        }
+
+        /* Chat Container */
+        .chat-container {
+            flex: 1;
+            background: rgba(26, 26, 46, 0.6);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Message Bubbles */
+        .message {
+            display: flex;
+            gap: 15px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+            flex-shrink: 0;
+        }
+
+        .message.ai .message-avatar {
+            background: linear-gradient(135deg, var(--bright-blue), var(--neon-blue));
+            border: 2px solid rgba(0, 212, 255, 0.5);
+        }
+
+        .message.user .message-avatar {
+            background: linear-gradient(135deg, #9944ff, #6600cc);
+            border: 2px solid rgba(153, 68, 255, 0.5);
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 15px 20px;
+            border-radius: 15px;
+            line-height: 1.6;
+        }
+
+        .message.ai .message-content {
+            background: rgba(15, 52, 96, 0.4);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            color: var(--text-primary);
+        }
+
+        .message.user .message-content {
+            background: rgba(0, 212, 255, 0.2);
+            border: 1px solid rgba(0, 212, 255, 0.4);
+            color: var(--text-primary);
+        }
+
+        .message-time {
+            font-size: 0.75em;
+            color: var(--text-secondary);
+            margin-top: 5px;
+        }
+
+        /* Typing Indicator */
+        .typing-indicator {
+            display: none;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .typing-indicator.active {
+            display: flex;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 5px;
+            padding: 15px 20px;
+            background: rgba(15, 52, 96, 0.4);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 15px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--neon-blue);
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+                opacity: 0.7;
+            }
+            30% {
+                transform: translateY(-10px);
+                opacity: 1;
+            }
+        }
+
+        /* Input Area */
+        .chat-input-area {
+            padding: 20px 25px;
+            background: rgba(15, 52, 96, 0.3);
+            border-top: 1px solid rgba(0, 212, 255, 0.2);
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 15px 20px;
+            background: rgba(26, 26, 46, 0.6);
+            border: 2px solid rgba(0, 212, 255, 0.3);
+            border-radius: 25px;
+            color: var(--text-primary);
+            font-size: 14px;
+            resize: none;
+            max-height: 120px;
+            min-height: 50px;
+            font-family: inherit;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
+        }
+
+        .send-btn {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--bright-blue), var(--neon-blue));
+            border: none;
+            border-radius: 50%;
+            color: var(--text-primary);
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .send-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 5px 20px rgba(0, 212, 255, 0.4);
+        }
+
+        .send-btn:active {
+            transform: scale(0.95);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Suggestions */
+        .suggestions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            padding: 15px 25px;
+            background: rgba(15, 52, 96, 0.2);
+            border-top: 1px solid rgba(0, 212, 255, 0.1);
+        }
+
+        .suggestion-chip {
+            padding: 8px 15px;
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 20px;
+            color: var(--neon-blue);
+            font-size: 0.85em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .suggestion-chip:hover {
+            background: rgba(0, 212, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        /* Welcome Message */
+        .welcome-message {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+        }
+
+        .welcome-message h2 {
+            color: var(--neon-blue);
+            margin-bottom: 15px;
+        }
+
+        .welcome-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .feature-card {
+            background: rgba(15, 52, 96, 0.3);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--neon-blue);
+        }
+
+        .feature-icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .feature-title {
+            color: var(--text-primary);
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .feature-desc {
+            font-size: 0.85em;
+            color: var(--text-secondary);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+
+            .message-content {
+                max-width: 85%;
+            }
+
+            .welcome-features {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="assistant-wrapper">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">TradeMind AI</div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="dashboard.html" class="nav-link">
+                        <span class="nav-icon">📊</span>
+                        Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="markets.html" class="nav-link">
+                        <span class="nav-icon">💹</span>
+                        Markets
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <span class="nav-icon">📈</span>
+                        Portfolio
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="ai-assistant.html" class="nav-link active">
+                        <span class="nav-icon">🤖</span>
+                        AI Assistant
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <span class="nav-icon">📰</span>
+                        News
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="profile.html" class="nav-link">
+                        <span class="nav-icon">👤</span>
+                        Profile
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <span class="nav-icon">⚙️</span>
+                        Settings
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="index.html" class="nav-link" id="logoutBtn">
+                        <span class="nav-icon">🚪</span>
+                        Logout
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <div class="chat-header">
+                <div class="header-left">
+                    <div class="ai-avatar">🤖</div>
+                    <div class="header-info">
+                        <h1>TradeMind AI Assistant</h1>
+                        <p>Your personal trading advisor - Ask me anything!</p>
+                    </div>
+                </div>
+                <div class="status-indicator">
+                    <div class="status-dot"></div>
+                    <span class="status-text">Online</span>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="quick-actions">
+                <button class="quick-action-btn" onclick="askQuestion('What is stock trading?')">💡 What is stock trading?</button>
+                <button class="quick-action-btn" onclick="askQuestion('Explain bull and bear markets')">📈 Bull vs Bear Markets</button>
+                <button class="quick-action-btn" onclick="askQuestion('What are dividends?')">💰 What are dividends?</button>
+                <button class="quick-action-btn" onclick="askQuestion('How to analyze stocks?')">🔍 Stock Analysis</button>
+                <button class="quick-action-btn" onclick="askQuestion('What is portfolio diversification?')">📊 Portfolio Tips</button>
+            </div>
+
+            <!-- Chat Container -->
+            <div class="chat-container">
+                <div class="chat-messages" id="chatMessages">
+                    <!-- Welcome Message -->
+                    <div class="welcome-message" id="welcomeMessage">
+                        <h2>👋 Welcome to TradeMind AI Assistant!</h2>
+                        <p>I'm your intelligent trading companion, ready to help you with:</p>
+                        
+                        <div class="welcome-features">
+                            <div class="feature-card">
+                                <div class="feature-icon">📚</div>
+                                <div class="feature-title">Trading Education</div>
+                                <div class="feature-desc">Learn the basics and advanced concepts</div>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">📊</div>
+                                <div class="feature-title">Stock Analysis</div>
+                                <div class="feature-desc">Understand market trends and patterns</div>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">💡</div>
+                                <div class="feature-title">Strategy Advice</div>
+                                <div class="feature-desc">Get personalized trading strategies</div>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">⚠️</div>
+                                <div class="feature-title">Risk Management</div>
+                                <div class="feature-desc">Learn to manage and minimize risks</div>
+                            </div>
+                        </div>
+                        
+                        <p style="margin-top: 30px; color: var(--neon-blue);">Ask me anything about trading, stocks, or financial markets!</p>
+                    </div>
+
+                    <!-- Typing Indicator -->
+                    <div class="typing-indicator" id="typingIndicator">
+                        <div class="message-avatar" style="background: linear-gradient(135deg, var(--bright-blue), var(--neon-blue)); border: 2px solid rgba(0, 212, 255, 0.5);">🤖</div>
+                        <div class="typing-dots">
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Suggestions -->
+                <div class="suggestions">
+                    <div class="suggestion-chip" onclick="askQuestion('What is the difference between stocks and bonds?')">Stocks vs Bonds</div>
+                    <div class="suggestion-chip" onclick="askQuestion('Explain market cap')">Market Cap</div>
+                    <div class="suggestion-chip" onclick="askQuestion('What is P/E ratio?')">P/E Ratio</div>
+                    <div class="suggestion-chip" onclick="askQuestion('How to read candlestick charts?')">Candlestick Charts</div>
+                </div>
+
+                <!-- Input Area -->
+                <div class="chat-input-area">
+                    <textarea 
+                        class="chat-input" 
+                        id="chatInput" 
+                        placeholder="Ask me anything about trading, stocks, or markets..."
+                        rows="1"
+                    ></textarea>
+                    <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+                        ➤
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Chat history
+        let chatHistory = [];
+        let conversationHistory = [];
+
+        // Get current time
+        function getCurrentTime() {
+            const now = new Date();
+            return now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        // Call Real AI API (Claude via Anthropic)
+        async function getAIResponse(userMessage) {
+            try {
+                const response = await fetch("https://api.anthropic.com/v1/messages", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        model: "claude-sonnet-4-20250514",
+                        max_tokens: 1000,
+                        messages: [
+                            {
+                                role: "user",
+                                content: `You are TradeMind AI, an expert trading and stock market assistant. Your role is to help users understand:
+- Stock trading concepts and strategies
+- Market analysis (fundamental and technical)
+- Investment principles
+- Risk management
+- Portfolio management
+- Trading terminology
+- Market trends and patterns
+
+Provide clear, educational, and helpful responses. Use examples when appropriate. Keep responses concise but informative.
+
+User question: ${userMessage}
+
+Provide a helpful, educational response in a friendly tone.`
+                            }
+                        ]
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.content && data.content[0] && data.content[0].text) {
+                    return data.content[0].text;
+                } else {
+                    throw new Error("Invalid response format");
+                }
+            } catch (error) {
+                console.error("API Error:", error);
+                return getFallbackResponse(userMessage);
+            }
+        }
+
+        // Fallback knowledge base (if API fails)
+        function getFallbackResponse(userMessage) {
+            const messageLower = userMessage.toLowerCase();
+            
+            if (messageLower.includes("hello") || messageLower.includes("hi") || messageLower.includes("hey")) {
+                return "Hello! 👋 I'm TradeMind AI, your trading assistant powered by advanced AI. I can help you understand stocks, trading strategies, market concepts, and more. What would you like to learn about today?";
+            }
+            
+            if (messageLower.includes("stock") && messageLower.includes("trading")) {
+                return "Stock trading involves buying and selling shares of publicly traded companies. When you buy a stock, you're purchasing ownership in that company. The goal is to buy low and sell high to make a profit.\n\nThere are different trading styles:\n• Day Trading - Multiple trades within one day\n• Swing Trading - Holding for days to weeks\n• Long-term Investing - Holding for months to years\n\nWould you like to know more about any specific aspect?";
+            }
+            
+            if (messageLower.includes("bull") || messageLower.includes("bear")) {
+                return "**Bull Market** 🐂: Prices are rising, investors are optimistic (20%+ increase)\n\n**Bear Market** 🐻: Prices are falling, investors are pessimistic (20%+ decline)\n\nThese terms come from how the animals attack - bulls thrust upward with horns, bears swipe downward with paws!";
+            }
+            
+            if (messageLower.includes("dividend")) {
+                return "Dividends are cash payments companies make to shareholders from their profits. It's like getting paid just for owning the stock! 💰\n\n• Usually paid quarterly\n• Not all companies pay dividends\n• Dividend yield = Annual dividend ÷ Stock price\n• Great for passive income\n\nExample: If a $100 stock pays $4/year in dividends, that's a 4% yield.";
+            }
+            
+            if (messageLower.includes("p/e") || messageLower.includes("price to earnings")) {
+                return "**P/E Ratio (Price-to-Earnings)** shows how much you're paying for each dollar of earnings.\n\nFormula: P/E = Stock Price ÷ Earnings Per Share\n\n• P/E of 15 = You pay $15 for every $1 of earnings\n• High P/E = Growth expectations or overvalued\n• Low P/E = Value opportunity or problems\n• Compare within same industry\n\nTech stocks often have P/E of 25-35, while banks are typically 10-15.";
+            }
+            
+            if (messageLower.includes("risk")) {
+                return "**Risk Management** is crucial for successful trading! ⚠️\n\n**Key Strategies:**\n1. Stop-Loss Orders - Limit potential losses\n2. Position Sizing - Don't risk more than 2-5% per trade\n3. Diversification - Spread investments across sectors\n4. Risk-Reward Ratio - Aim for 1:2 or better\n\n**Golden Rule**: Never invest money you can't afford to lose!";
+            }
+            
+            if (messageLower.includes("help") || messageLower.includes("what can you")) {
+                return "I'm powered by advanced AI and can help with:\n\n• Stock trading basics and strategies 📊\n• Market analysis and concepts 📈\n• Investment principles 💰\n• Risk management ⚠️\n• Portfolio diversification 🎯\n• Technical and fundamental analysis 🔍\n• Trading psychology 🧠\n\nI have unlimited knowledge about trading and markets. Ask me anything!";
+            }
+            
+            return "That's an interesting question about trading! While I'm experiencing a temporary connection issue, I can still help with many trading topics:\n\n• Stock analysis and valuation\n• Trading strategies\n• Market terminology\n• Investment principles\n• Risk management\n\nCould you ask about one of these specific topics? Or try rephrasing your question?";
+        }
+
+        // Add message to chat
+        function addMessage(content, isUser = false) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const welcomeMessage = document.getElementById('welcomeMessage');
+            
+            if (welcomeMessage && chatHistory.length === 0) {
+                welcomeMessage.style.display = 'none';
+            }
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'ai'}`;
+            
+            const avatar = document.createElement('div');
+            avatar.className = 'message-avatar';
+            avatar.textContent = isUser ? '👤' : '🤖';
+            
+            const contentDiv = document.createElement('div');
+            
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content';
+            messageContent.innerHTML = content.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            
+            const messageTime = document.createElement('div');
+            messageTime.className = 'message-time';
+            messageTime.textContent = getCurrentTime();
+            
+            contentDiv.appendChild(messageContent);
+            contentDiv.appendChild(messageTime);
+            
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(contentDiv);
+            
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            
+            chatHistory.push({
+                content: content,
+                isUser: isUser,
+                time: getCurrentTime()
+            });
+        }
+
+        // Show typing indicator
+        function showTyping() {
+            document.getElementById('typingIndicator').classList.add('active');
+            const messagesContainer = document.getElementById('chatMessages');
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Hide typing indicator
+        function hideTyping() {
+            document.getElementById('typingIndicator').classList.remove('active');
+        }
+
+        // Send message with real AI
+        async function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            // Disable input while processing
+            input.disabled = true;
+            document.getElementById('sendBtn').disabled = true;
+            
+            // Add user message
+            addMessage(message, true);
+            input.value = '';
+            
+            // Show typing indicator
+            showTyping();
+            
+            try {
+                // Get AI response from real API
+                const response = await getAIResponse(message);
+                
+                // Hide typing and show response
+                hideTyping();
+                addMessage(response, false);
+            } catch (error) {
+                hideTyping();
+                addMessage("I apologize, but I'm having trouble connecting right now. Please try again in a moment!", false);
+            } finally {
+                // Re-enable input
+                input.disabled = false;
+                document.getElementById('sendBtn').disabled = false;
+                input.focus();
+            }
+        }
+
+        // Ask predefined question
+        function askQuestion(question) {
+            document.getElementById('chatInput').value = question;
+            sendMessage();
+        }
+
+        // Auto-resize textarea
+        const chatInput = document.getElementById('chatInput');
+        chatInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+        });
+
+        // Send on Enter (but allow Shift+Enter for new line)
+        chatInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // Logout
+        document.getElementById('logoutBtn').addEventListener('click', function(e) {
+            e.preventDefault();
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('isLoggedIn');
+                localStorage.removeItem('userData');
+                window.location.href = 'index.html';
+            }
+        });
+
+        // Initial greeting
+        window.addEventListener('load', function() {
+            console.log('🤖 TradeMind AI Assistant ready - Powered by Real AI!');
+        });
+    </script>
+</body>
+</html>
+            "stock trading": {
+                keywords: ["stock", "trading", "trade", "equity"],
+                response: "Stock trading involves buying and selling shares of publicly traded companies on stock exchanges. When you buy a stock, you're purchasing a small ownership stake in that company. The goal is to buy stocks at a lower price and sell them at a higher price to make a profit. There are different trading styles:\n\n• **Day Trading**: Buying and selling within the same day\n• **Swing Trading**: Holding for days to weeks\n• **Position Trading**: Long-term holding (months to years)\n\nWould you like to know more about any specific trading strategy?"
+            },
+            "bull bear market": {
+                keywords: ["bull", "bear", "market trend"],
+                response: "**Bull Market** 🐂: A market condition where prices are rising or expected to rise. Investors are optimistic, and there's strong buying activity. Typically defined as a 20%+ increase from recent lows.\n\n**Bear Market** 🐻: A market condition where prices are falling or expected to fall. Investors are pessimistic, leading to selling pressure. Usually defined as a 20%+ decline from recent highs.\n\n**Key Indicators**:\n• Economic growth = Bull market\n• Economic recession = Bear market\n• High investor confidence = Bull\n• Fear and uncertainty = Bear"
+            },
+            "dividends": {
+                keywords: ["dividend", "payout", "income"],
+                response: "Dividends are payments companies make to shareholders from their profits. Think of it as a reward for investing in the company! 💰\n\n**Key Points**:\n• Usually paid quarterly (every 3 months)\n• Not all companies pay dividends\n• Dividend yield = Annual dividend / Stock price\n• Reliable dividend payers are called 'dividend stocks'\n\n**Example**: If a stock costs $100 and pays $4 annually in dividends, the dividend yield is 4%.\n\nDividend investing is popular for generating passive income!"
+            },
+            "stock analysis": {
+                keywords: ["analyze", "analysis", "evaluate", "research"],
+                response: "There are two main approaches to stock analysis:\n\n**1. Fundamental Analysis** 📊\n• Study company financials (revenue, profit, debt)\n• Analyze P/E ratio, EPS, market cap\n• Evaluate business model and competitive advantages\n• Review management quality\n\n**2. Technical Analysis** 📈\n• Study price charts and patterns\n• Use indicators (RSI, MACD, Moving Averages)\n• Identify support/resistance levels\n• Analyze volume trends\n\n**Best Practice**: Combine both methods for comprehensive analysis!"
+            },
+            "portfolio diversification": {
+                keywords: ["diversify", "portfolio", "allocation", "spread"],
+                response: "Portfolio diversification means 'don't put all your eggs in one basket!' 🧺\n\n**Why Diversify?**\n• Reduces risk if one investment fails\n• Smooths out volatility\n• Provides multiple income sources\n\n**How to Diversify**:\n1. **Across Sectors**: Tech, Healthcare, Finance, Energy\n2. **Across Asset Classes**: Stocks, Bonds, Real Estate, Commodities\n3. **Across Geographies**: US, International, Emerging Markets\n4. **Across Company Sizes**: Large-cap, Mid-cap, Small-cap\n\n**Rule of Thumb**: Hold 15-30 different stocks for good diversification."
+            },
+            "pe ratio": {
+                keywords: ["p/e", "pe ratio", "price to earnings"],
+                response: "**P/E Ratio (Price-to-Earnings)** is a key valuation metric!\n\nFormula: P/E = Stock Price / Earnings Per Share (EPS)\n\n**What it means**:\n• P/E of 15 = You pay $15 for every $1 of earnings\n• High P/E = Stock might be overvalued OR has high growth expectations\n• Low P/E = Stock might be undervalued OR company has problems\n\n**Industry Averages**:\n• Tech stocks: 25-35 (high growth)\n• Banks: 10-15 (stable, mature)\n• Market average: ~15-20\n\n**Remember**: Compare P/E within the same industry!"
+            },
+            "market cap": {
+                keywords: ["market cap", "capitalization", "company size"],
+                response: "**Market Capitalization** = Total value of a company's shares\n\nFormula: Market Cap = Stock Price × Total Shares Outstanding\n\n**Categories**:\n• **Large-cap**: $10B+ (e.g., Apple, Microsoft)\n  - More stable, less volatile\n• **Mid-cap**: $2B - $10B\n  - Balance of growth and stability\n• **Small-cap**: $300M - $2B\n  - Higher growth potential, more volatile\n\n**Example**: If AAPL trades at $180 with 15.5B shares:\nMarket Cap = $180 × 15.5B = $2.79 Trillion! 🚀"
+            },
+            "candlestick": {
+                keywords: ["candlestick", "chart", "candle"],
+                response: "**Candlestick Charts** show price movement in a visual way! 🕯️\n\n**Parts of a Candlestick**:\n• **Body**: Opening to closing price\n• **Wicks/Shadows**: High and low prices\n• **Green/White**: Price went UP (bullish)\n• **Red/Black**: Price went DOWN (bearish)\n\n**Common Patterns**:\n• **Doji**: Indecision in market\n• **Hammer**: Potential reversal upward\n• **Shooting Star**: Potential reversal downward\n• **Engulfing**: Strong trend change signal\n\nCandlesticks help traders predict future price movements!"
+            },
+            "stocks bonds": {
+                keywords: ["stocks vs bonds", "difference between"],
+                response: "**Stocks** 📈:\n• Ownership in a company\n• Higher risk, higher potential returns\n• Volatile prices\n• Can pay dividends\n• Example: Buying Apple shares\n\n**Bonds** 📋:\n• Loan to company/government\n• Lower risk, lower returns\n• More stable\n• Fixed interest payments\n• Example: US Treasury Bonds\n\n**Simple Analogy**:\n• Stock = Being a business owner\n• Bond = Being a lender\n\nMost portfolios have both for balance!"
+            },
+            "risk management": {
+                keywords: ["risk", "manage", "loss", "safety"],
+                response: "**Risk Management** is crucial for successful trading! ⚠️\n\n**Key Strategies**:\n1. **Stop-Loss Orders**: Automatically sell if price drops to X\n2. **Position Sizing**: Don't invest more than 2-5% per stock\n3. **Diversification**: Spread investments across sectors\n4. **Risk-Reward Ratio**: Aim for 1:2 or better (risk $1 to make $2)\n5. **Emergency Fund**: Keep cash reserve for opportunities\n\n**Golden Rules**:\n• Never invest money you can't afford to lose\n• Don't chase losses\n• Have an exit strategy BEFORE entering\n• Emotions are your enemy - stick to your plan!"
+            },
+            "day trading": {
+                keywords: ["day trading", "intraday"],
+                response: "**Day Trading** = Buying and selling stocks within the same trading day 📊\n\n**Characteristics**:\n• No overnight positions\n• Multiple trades per day\n• Requires significant time and attention\n• Uses technical analysis heavily\n\n**Requirements**:\n• $25,000 minimum account (US)\n• Fast internet connection\n• Real-time data feeds\n• Strong discipline\n\n**Pros**: Quick profits, no overnight risk\n**Cons**: Stressful, high fees, requires skill\n\n⚠️ **Warning**: 90% of day traders lose money. Only for experienced traders!"
+            }
+        };
+
+        // Chat history
+        let chatHistory = [];
+
+        // Get current time
+        function getCurrentTime() {
+            const now = new Date();
+            return now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        // Find best matching response
+        function findBestResponse(userMessage) {
+            const messageLower = userMessage.toLowerCase();
+            
+            // Check each knowledge base entry
+            for (const [key, data] of Object.entries(knowledgeBase)) {
+                for (const keyword of data.keywords) {
+                    if (messageLower.includes(keyword)) {
+                        return data.response;
+                    }
+                }
+            }
+            
+            // Default responses for common queries
+            if (messageLower.includes("hello") || messageLower.includes("hi") || messageLower.includes("hey")) {
+                return "Hello! 👋 I'm TradeMind AI, your trading assistant. I can help you understand stocks, trading strategies, market concepts, and more. What would you like to learn about today?";
+            }
+            
+            if (messageLower.includes("help") || messageLower.includes("what can you do")) {
+                return "I can help you with:\n\n• Stock trading basics and strategies\n• Market concepts (bull/bear markets, P/E ratios, etc.)\n• Stock analysis techniques\n• Portfolio management\n• Risk management\n• Investment strategies\n• Technical and fundamental analysis\n\nJust ask me any question about trading or investing!";
+            }
+            
+            if (messageLower.includes("thank")) {
+                return "You're welcome! Feel free to ask me anything else about trading or stocks. I'm here to help! 😊";
+            }
+            
+            // Default fallback
+            return "That's an interesting question! While I specialize in stock trading and market concepts, I'd be happy to help with related topics like:\n\n• Stock analysis and valuation\n• Trading strategies\n• Market terminology\n• Investment principles\n• Risk management\n\nCould you rephrase your question or ask about one of these topics?";
+        }
+
+        // Add message to chat
+        function addMessage(content, isUser = false) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const welcomeMessage = document.getElementById('welcomeMessage');
+            
+            // Hide welcome message on first interaction
+            if (welcomeMessage && chatHistory.length === 0) {
+                welcomeMessage.style.display = 'none';
+            }
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'ai'}`;
+            
+            const avatar = document.createElement('div');
+            avatar.className = 'message-avatar';
+            avatar.textContent = isUser ? '👤' : '🤖';
+            
+            const contentDiv = document.createElement('div');
+            
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content';
+            messageContent.innerHTML = content.replace(/\n/g, '<br>');
+            
+            const messageTime = document.createElement('div');
+            messageTime.className = 'message-time';
+            messageTime.textContent = getCurrentTime();
+            
+            contentDiv.appendChild(messageContent);
+            contentDiv.appendChild(messageTime);
+            
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(contentDiv);
+            
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            
+            // Save to history
+            chatHistory.push({
+                content: content,
+                isUser: isUser,
+                time: getCurrentTime()
+            });
+        }
+
+        // Show typing indicator
+        function showTyping() {
+            document.getElementById('typingIndicator').classList.add('active');
+            const messagesContainer = document.getElementById('chatMessages');
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Hide typing indicator
+        function hideTyping() {
+            document.getElementById('typingIndicator').classList.remove('active');
+        }
+
+        // Send message
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            // Add user message
+            addMessage(message, true);
+            input.value = '';
+            
+            // Show typing indicator
+            showTyping();
+            
+            // Simulate AI thinking time (1-2 seconds)
+            setTimeout(() => {
+                hideTyping();
+                
+                // Get AI response
+                const response = findBestResponse(message);
+                addMessage(response, false);
+            }, 1000 + Math.random() * 1000);
+        }
+
+        // Ask predefined question
+        function askQuestion(question) {
+            document.getElementById('chatInput').value = question;
+            sendMessage();
+        }
+
+        // Auto-resize textarea
+        const chatInput = document.getElementById('chatInput');
+        chatInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+        });
+
+        // Send on Enter (but allow Shift+Enter for new line)
+        chatInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // Logout
+        document.getElementById('logoutBtn').addEventListener('click', function(e) {
+            e.preventDefault();
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('isLoggedIn');
+                localStorage.removeItem('userData');
+                window.location.href = 'index.html';
+            }
+        });
+
+        // Welcome message on load
+        window.addEventListener('load', function() {
+            // Auto-greet after 1 second if no interaction
+            setTimeout(() => {
+                if (chatHistory.length === 0) {
+                    console.log('AI Assistant ready!');
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
