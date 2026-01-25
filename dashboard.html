@@ -1,10 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TradeMind AI - Dashboard</title>
     <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+    <script src="market-service.js"></script>
     <style>
         /* Dashboard specific styles */
         body {
@@ -55,7 +58,8 @@
             transition: all 0.3s ease;
         }
 
-        .nav-link:hover, .nav-link.active {
+        .nav-link:hover,
+        .nav-link.active {
             background: rgba(0, 212, 255, 0.1);
             color: var(--neon-blue);
         }
@@ -101,7 +105,8 @@
             align-items: center;
         }
 
-        .notification-btn, .profile-btn {
+        .notification-btn,
+        .profile-btn {
             background: rgba(15, 52, 96, 0.3);
             border: 1px solid rgba(0, 212, 255, 0.3);
             padding: 10px 15px;
@@ -111,7 +116,8 @@
             transition: all 0.3s ease;
         }
 
-        .notification-btn:hover, .profile-btn:hover {
+        .notification-btn:hover,
+        .profile-btn:hover {
             background: rgba(15, 52, 96, 0.5);
             border-color: var(--neon-blue);
         }
@@ -222,7 +228,8 @@
             font-size: 0.85em;
         }
 
-        .filter-btn:hover, .filter-btn.active {
+        .filter-btn:hover,
+        .filter-btn.active {
             background: rgba(0, 212, 255, 0.2);
             color: var(--neon-blue);
             border-color: var(--neon-blue);
@@ -360,17 +367,18 @@
             .sidebar {
                 transform: translateX(-100%);
             }
-            
+
             .main-content {
                 margin-left: 0;
             }
-            
+
             .stats-grid {
                 grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
+
 <body>
     <div class="dashboard-wrapper">
         <!-- Sidebar Navigation -->
@@ -495,9 +503,8 @@
                             <button class="filter-btn">1Y</button>
                         </div>
                     </div>
-                    <div class="chart-placeholder">
-                        📊 Chart visualization will be implemented here
-                        <br><small>(Integration with Chart.js or similar)</small>
+                    <div class="chart-canvas" style="height: 300px; position: relative;">
+                        <canvas id="portfolioChart"></canvas>
                     </div>
                 </div>
 
@@ -506,7 +513,7 @@
                     <div class="section-header">
                         <h2 class="section-title">🤖 AI Insights</h2>
                     </div>
-                    
+
                     <div class="insight-item">
                         <div class="insight-title">
                             <span class="insight-icon">💡</span>
@@ -543,7 +550,8 @@
                             Strategy Suggestion
                         </div>
                         <p class="insight-text">
-                            Your portfolio is overexposed to tech. Consider diversifying into healthcare and consumer goods.
+                            Your portfolio is overexposed to tech. Consider diversifying into healthcare and consumer
+                            goods.
                         </p>
                     </div>
                 </div>
@@ -555,7 +563,7 @@
                     <h2 class="section-title">Recent Trades</h2>
                     <button class="filter-btn">View All →</button>
                 </div>
-                
+
                 <table class="trade-table">
                     <thead>
                         <tr>
@@ -631,33 +639,198 @@
         </main>
     </div>
 
-    <script>
-        // Load user data
-        window.addEventListener('load', function() {
-            const userData = JSON.parse(localStorage.getItem('userData') || '{}');
-            if (userData.email) {
-                const userName = userData.email.split('@')[0];
-                document.getElementById('userName').textContent = userName.charAt(0).toUpperCase() + userName.slice(1);
-            }
-        });
+    let portfolioChart = null;
+    let portfolioHistory = [];
+
+    // Portfolio initial state (demo)
+    const myPortfolio = [
+    { symbol: 'AAPL', quantity: 50, entryPrice: 175.20 },
+    { symbol: 'MSFT', quantity: 30, entryPrice: 380.50 },
+    { symbol: 'TSLA', quantity: 25, entryPrice: 245.80 },
+    { symbol: 'NVDA', quantity: 15, entryPrice: 485.30 }
+    ];
+
+    // Initialize Market Service subscription
+    window.addEventListener('load', function () {
+    const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+    if (userData.email) {
+    const userName = userData.email.split('@')[0];
+    document.getElementById('userName').textContent = userName.charAt(0).toUpperCase() + userName.slice(1);
+    }
+
+    marketService.subscribe((symbol, data) => {
+    updateDashboardForSymbol(symbol, data);
+    });
+
+    // Start tracking symbols relevant to the dashboard
+    myPortfolio.forEach(item => {
+    marketService.getStockPrice(item.symbol);
+    });
+
+    // Initial chart setup
+    initPortfolioChart();
+
+    // Periodically update insights
+    setInterval(updateAIInsights, 10000);
+    updateAIInsights();
+    });
+
+    function updateDashboardForSymbol(symbol, data) {
+    // Update Recent Trades table
+    const tradeRows = document.querySelectorAll('.trade-table tbody tr');
+    tradeRows.forEach(row => {
+    const rowSymbol = row.querySelector('td strong').textContent;
+    if (rowSymbol === symbol) {
+    const priceCell = row.querySelectorAll('td')[4];
+    const pnlCell = row.querySelectorAll('td')[5];
+    const entryPrice = parseFloat(row.querySelectorAll('td')[3].textContent.replace('$', ''));
+    const quantity = parseInt(row.querySelectorAll('td')[2].textContent);
+
+    priceCell.textContent = `$${data.price.toFixed(2)}`;
+    const pnl = (data.price - entryPrice) * quantity;
+    pnlCell.textContent = `${pnl >= 0 ? '+' : ''}$${pnl.toFixed(0)}`;
+    pnlCell.style.color = pnl >= 0 ? 'var(--success-green)' : 'var(--warning-red)';
+    }
+    });
+
+    // Update Portfolio Stats
+    calculateTotalPortfolio();
+    }
+
+    function calculateTotalPortfolio() {
+    let totalValue = 0;
+    let totalPnl = 0;
+    let fullyLoaded = true;
+
+    myPortfolio.forEach(item => {
+    const currentData = marketService.currentPrices[item.symbol.toUpperCase()];
+    if (currentData) {
+    totalValue += currentData.price * item.quantity;
+    totalPnl += (currentData.price - item.entryPrice) * item.quantity;
+    } else {
+    fullyLoaded = false;
+    // Fallback to entry price for now
+    totalValue += item.entryPrice * item.quantity;
+    }
+    });
+
+    if (fullyLoaded) {
+    document.querySelectorAll('.stat-value')[0].textContent = `$${Math.round(totalValue).toLocaleString()}`;
+    document.querySelectorAll('.stat-value')[1].textContent = `${totalPnl >= 0 ? '+' :
+    ''}$${Math.round(totalPnl).toLocaleString()}`;
+
+    // Add to history for chart
+    const now = new Date();
+    if (portfolioHistory.length === 0 || now - portfolioHistory[portfolioHistory.length - 1].time > 5000) {
+    portfolioHistory.push({ time: now, value: totalValue });
+    if (portfolioHistory.length > 20) portfolioHistory.shift();
+    updateChart();
+    }
+    }
+    }
+
+    function initPortfolioChart() {
+    const ctx = document.getElementById('portfolioChart').getContext('2d');
+
+    // Pre-fill with some mock historical data to look good
+    const now = Date.now();
+    for (let i = 20; i > 0; i--) {
+    portfolioHistory.push({
+    time: new Date(now - i * 60000),
+    value: 44000 + Math.random() * 1000
+    });
+    }
+
+    portfolioChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+    labels: portfolioHistory.map(h => h.time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })),
+    datasets: [{
+    label: 'Portfolio Value',
+    data: portfolioHistory.map(h => h.value),
+    borderColor: '#00d4ff',
+    backgroundColor: 'rgba(0, 212, 255, 0.1)',
+    fill: true,
+    tension: 0.4,
+    borderWidth: 2,
+    pointRadius: 0
+    }]
+    },
+    options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+    x: { display: false },
+    y: {
+    grid: { color: 'rgba(0, 212, 255, 0.05)' },
+    ticks: { color: '#b3b3b3', callback: (v) => '$' + v.toLocaleString() }
+    }
+    }
+    }
+    });
+    }
+
+    function updateChart() {
+    if (!portfolioChart) return;
+    portfolioChart.data.labels = portfolioHistory.map(h => h.time.toLocaleTimeString([], { hour: '2-digit', minute:
+    '2-digit' }));
+    portfolioChart.data.datasets[0].data = portfolioHistory.map(h => h.value);
+    portfolioChart.update('none'); // silent update
+    }
+
+    function updateAIInsights() {
+    const insightsContainer = document.querySelector('.ai-insights');
+    const symbols = Object.keys(marketService.currentPrices);
+    if (symbols.length === 0) return;
+
+    const insights = [];
+
+    // Real-time analysis logic
+    symbols.forEach(s => {
+    const data = marketService.currentPrices[s];
+    if (data.changePercent > 2) {
+    insights.push({
+    title: 'Bullish Momentum',
+    icon: '🚀',
+    text: `${s} is surging! It's up ${data.changePercent.toFixed(2)}%. AI suggests trailing stop-loss.`
+    });
+    } else if (data.changePercent < -2) { insights.push({ title: 'dip Detected' , icon: '📉' , text: `${s} is pulling
+        back. RSI indicates oversold levels. Possible buy opportunity.` }); } }); // Add default if no major moves if
+        (insights.length < 2) { insights.push({ title: 'Strategic Hold' , icon: '💎' ,
+        text: 'Market volatility is low. Current portfolio allocation looks optimal for long-term growth.' }); } //
+        Render top 3 const items=insights.slice(0, 4); const html=items.map(item=> `
+        <div class="insight-item">
+            <div class="insight-title">
+                <span class="insight-icon">${item.icon}</span>
+                ${item.title}
+            </div>
+            <p class="insight-text">${item.text}</p>
+        </div>
+        `).join('');
+
+        // Keep the header
+        const header = insightsContainer.querySelector('.section-header').outerHTML;
+        insightsContainer.innerHTML = header + html;
+        }
 
         // Logout functionality
-        document.getElementById('logoutBtn').addEventListener('click', function(e) {
-            e.preventDefault();
-            if (confirm('Are you sure you want to logout?')) {
-                localStorage.removeItem('isLoggedIn');
-                localStorage.removeItem('userData');
-                window.location.href = 'index.html';
-            }
+        document.getElementById('logoutBtn').addEventListener('click', function (e) {
+        e.preventDefault();
+        if (confirm('Are you sure you want to logout?')) {
+        localStorage.removeItem('isLoggedIn');
+        localStorage.removeItem('userData');
+        window.location.href = 'index.html';
+        }
         });
 
         // Time filter buttons
         document.querySelectorAll('.filter-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-            });
+        btn.addEventListener('click', function () {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
         });
-    </script>
+        });
 </body>
+
 </html>
