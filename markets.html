@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TradeMind AI - Markets</title>
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+    <script src="market-service.js"></script>
     <style>
         body {
             background: var(--primary-dark);
@@ -54,7 +56,8 @@
             transition: all 0.3s ease;
         }
 
-        .nav-link:hover, .nav-link.active {
+        .nav-link:hover,
+        .nav-link.active {
             background: rgba(0, 212, 255, 0.1);
             color: var(--neon-blue);
         }
@@ -248,7 +251,8 @@
             font-size: 0.85em;
         }
 
-        .time-btn:hover, .time-btn.active {
+        .time-btn:hover,
+        .time-btn.active {
             background: rgba(0, 212, 255, 0.2);
             color: var(--neon-blue);
             border-color: var(--neon-blue);
@@ -430,7 +434,7 @@
             .sidebar {
                 transform: translateX(-100%);
             }
-            
+
             .main-content {
                 margin-left: 0;
             }
@@ -447,6 +451,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="markets-wrapper">
         <aside class="sidebar">
@@ -507,7 +512,8 @@
             <div class="page-header">
                 <h1 class="page-title">📈 Markets</h1>
                 <div class="search-bar">
-                    <input type="text" class="search-input" id="searchInput" placeholder="Search stocks (e.g., AAPL, TSLA, MSFT...)">
+                    <input type="text" class="search-input" id="searchInput"
+                        placeholder="Search stocks (e.g., AAPL, TSLA, MSFT...)">
                     <button class="search-btn" onclick="searchStock()">🔍 Search</button>
                 </div>
                 <div class="live-indicator">
@@ -571,7 +577,8 @@
                 <div class="action-buttons">
                     <button class="buy-btn" onclick="buyStock()">📊 BUY</button>
                     <button class="sell-btn" onclick="sellStock()">📉 SELL</button>
-                    <button class="watchlist-btn" id="watchlistBtn" onclick="toggleWatchlist()">⭐ Add to Watchlist</button>
+                    <button class="watchlist-btn" id="watchlistBtn" onclick="toggleWatchlist()">⭐ Add to
+                        Watchlist</button>
                 </div>
             </div>
 
@@ -579,7 +586,7 @@
                 <div class="section-header">
                     <h2 class="section-title">📊 Live Stock Prices</h2>
                 </div>
-                
+
                 <table class="stocks-table">
                     <thead>
                         <tr>
@@ -601,66 +608,165 @@
 
     <script>
         let priceChart = null;
-        
-        const stocksData = [
-            { symbol: 'AAPL', name: 'Apple Inc.', price: 182.50, change: 4.20, changePercent: 2.36, volume: '54.2M', marketCap: '$2.87T' },
-            { symbol: 'MSFT', name: 'Microsoft Corp.', price: 395.20, change: 5.80, changePercent: 1.49, volume: '23.1M', marketCap: '$2.93T' },
-            { symbol: 'GOOGL', name: 'Alphabet Inc.', price: 141.80, change: -1.20, changePercent: -0.84, volume: '18.5M', marketCap: '$1.76T' },
-            { symbol: 'AMZN', name: 'Amazon.com Inc.', price: 178.35, change: 3.15, changePercent: 1.80, volume: '42.8M', marketCap: '$1.84T' },
-            { symbol: 'TSLA', name: 'Tesla Inc.', price: 238.20, change: -7.60, changePercent: -3.09, volume: '98.7M', marketCap: '$755B' },
-            { symbol: 'NVDA', name: 'NVIDIA Corp.', price: 502.80, change: 17.50, changePercent: 3.61, volume: '35.4M', marketCap: '$1.24T' },
-            { symbol: 'META', name: 'Meta Platforms', price: 468.90, change: 8.45, changePercent: 1.84, volume: '12.3M', marketCap: '$1.19T' },
-            { symbol: 'JPM', name: 'JPMorgan Chase', price: 185.65, change: 2.35, changePercent: 1.28, volume: '8.9M', marketCap: '$543B' }
+
+        // Symbols we want to track initially
+        const trackedSymbols = [
+            { symbol: 'AAPL', name: 'Apple Inc.', type: 'stock' },
+            { symbol: 'MSFT', name: 'Microsoft Corp.', type: 'stock' },
+            { symbol: 'BTCUSDT', name: 'Bitcoin', type: 'crypto' },
+            { symbol: 'ETHUSDT', name: 'Ethereum', type: 'crypto' },
+            { symbol: 'TSLA', name: 'Tesla Inc.', type: 'stock' },
+            { symbol: 'NVDA', name: 'NVIDIA Corp.', type: 'stock' },
+            { symbol: 'SOLUSDT', name: 'Solana', type: 'crypto' },
+            { symbol: 'BNBUSDT', name: 'Binance Coin', type: 'crypto' }
         ];
 
-        function populateStocksTable(stocks = stocksData) {
+        // Initialize Market Service subscription
+        window.addEventListener('load', async () => {
+            marketService.subscribe((symbol, data) => {
+                updateUIForSymbol(symbol, data);
+            });
+
+            // Initial stocking of table
+            populateStocksTable(trackedSymbols);
+
+            // Fetch initial indices
+            updateMarketIndices();
+
+            // Kick off data fetching
+            trackedSymbols.forEach(item => {
+                if (item.type === 'stock') {
+                    marketService.getStockPrice(item.symbol);
+                }
+            });
+
+            // Set initial selected stock
+            setTimeout(() => selectStock('AAPL'), 1000);
+        });
+
+        async function updateMarketIndices() {
+            const indicesData = await marketService.getMarketIndices();
+            const indexCards = document.querySelectorAll('.index-card');
+
+            // Map names to cards
+            const nameToCard = {};
+            indexCards.forEach(card => {
+                const name = card.querySelector('.index-name').textContent;
+                nameToCard[name] = card;
+            });
+
+            for (const [name, data] of Object.entries(indicesData)) {
+                const card = nameToCard[name];
+                if (card) {
+                    card.querySelector('.index-value').textContent = data.price.toLocaleString(undefined, { minimumFractionDigits: 2 });
+                    const changeEl = card.querySelector('.index-change');
+                    const isPositive = data.changePercent >= 0;
+                    changeEl.className = `index-change ${isPositive ? 'positive' : 'negative'}`;
+                    changeEl.textContent = `${isPositive ? '↑' : '↓'} ${Math.abs(data.changePercent).toFixed(2)}%`;
+                }
+            }
+        }
+
+        function updateUIForSymbol(symbol, data) {
+            // Update table
+            const row = document.querySelector(`tr[data-symbol="${symbol}"]`);
+            if (row) {
+                const priceCell = row.querySelector('.price-cell');
+                const changeCell = row.querySelector('.change-cell');
+                const percentCell = row.querySelector('.percent-cell');
+
+                const oldPrice = parseFloat(priceCell.textContent.replace('$', '').replace(',', '')) || 0;
+                priceCell.textContent = `$${data.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+                // Flash effect
+                if (oldPrice > 0) {
+                    if (data.price > oldPrice) {
+                        priceCell.style.color = 'var(--success-green)';
+                    } else if (data.price < oldPrice) {
+                        priceCell.style.color = 'var(--warning-red)';
+                    }
+                    setTimeout(() => priceCell.style.color = '', 500);
+                }
+
+                const changeSymbol = data.changePercent >= 0 ? '↑' : '↓';
+                const color = data.changePercent >= 0 ? 'var(--success-green)' : 'var(--warning-red)';
+
+                changeCell.style.color = color;
+                const priceChangeValue = Math.abs(data.price * data.changePercent / 100);
+                changeCell.textContent = `${changeSymbol} $${priceChangeValue.toFixed(2)}`;
+
+                percentCell.innerHTML = `
+                    <span class="price-change ${data.changePercent >= 0 ? 'positive' : 'negative'}">
+                        ${changeSymbol} ${Math.abs(data.changePercent).toFixed(2)}%
+                    </span>
+                `;
+            }
+
+            // Update chart if active
+            const currentChartSymbol = document.getElementById('chartSymbol').textContent;
+            if (currentChartSymbol === symbol) {
+                document.getElementById('chartPrice').textContent = '$' + data.price.toLocaleString(undefined, { minimumFractionDigits: 2 });
+                const changeSymbol = data.changePercent >= 0 ? '↑' : '↓';
+                const colorClass = data.changePercent >= 0 ? 'positive' : 'negative';
+                const chartChangeEl = document.getElementById('chartChange');
+                chartChangeEl.className = 'price-change ' + colorClass;
+                chartChangeEl.textContent = `${changeSymbol} ${Math.abs(data.changePercent).toFixed(2)}%`;
+            }
+        }
+
+        function populateStocksTable(stocks) {
             const tbody = document.getElementById('stocksTableBody');
             tbody.innerHTML = '';
-            
+
             stocks.forEach(stock => {
-                const changeClass = stock.change >= 0 ? 'positive' : 'negative';
-                const changeSymbol = stock.change >= 0 ? '↑' : '↓';
-                
                 const row = document.createElement('tr');
-                row.onclick = function() {
-                    selectStock(stock.symbol, stock.price, stock.change, stock.changePercent);
+                row.setAttribute('data-symbol', stock.symbol);
+                row.onclick = function () {
+                    selectStock(stock.symbol);
                 };
-                
+
+                const currentData = marketService.currentPrices[stock.symbol] || { price: 0, changePercent: 0 };
+                const isPositive = (currentData.changePercent || 0) >= 0;
+                const changeSymbol = isPositive ? '↑' : '↓';
+
                 row.innerHTML = `
                     <td class="stock-symbol">${stock.symbol}</td>
                     <td>
                         <div>${stock.name}</div>
-                        <div class="stock-name">Technology</div>
+                        <div class="stock-name">${stock.type === 'crypto' ? 'Cryptocurrency' : 'Technology'}</div>
                     </td>
-                    <td>$${stock.price.toFixed(2)}</td>
-                    <td style="color: ${stock.change >= 0 ? 'var(--success-green)' : 'var(--warning-red)'}">
-                        ${changeSymbol} $${Math.abs(stock.change).toFixed(2)}
+                    <td class="price-cell">$${(currentData.price || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                    <td class="change-cell" style="color: ${isPositive ? 'var(--success-green)' : 'var(--warning-red)'}">
+                        ${changeSymbol} $${Math.abs((currentData.price || 0) * (currentData.changePercent || 0) / 100).toFixed(2)}
                     </td>
-                    <td>
-                        <span class="price-change ${changeClass}">
-                            ${changeSymbol} ${Math.abs(stock.changePercent).toFixed(2)}%
+                    <td class="percent-cell">
+                        <span class="price-change ${isPositive ? 'positive' : 'negative'}">
+                            ${changeSymbol} ${Math.abs(currentData.changePercent || 0).toFixed(2)}%
                         </span>
                     </td>
-                    <td>${stock.volume}</td>
-                    <td>${stock.marketCap}</td>
+                    <td>${currentData.volume || '---'}</td>
+                    <td>${currentData.marketCap || '---'}</td>
                 `;
-                
+
                 tbody.appendChild(row);
             });
         }
 
-        function selectStock(symbol, price, change, changePercent) {
+        async function selectStock(symbol) {
+            const stockInfo = trackedSymbols.find(s => s.symbol === symbol) || { symbol: symbol, name: symbol, type: 'stock' };
             document.getElementById('chartSymbol').textContent = symbol;
-            document.getElementById('chartPrice').textContent = '$' + price.toFixed(2);
-            
-            const changeClass = change >= 0 ? 'positive' : 'negative';
-            const changeSymbol = change >= 0 ? '↑' : '↓';
+
+            const currentData = marketService.currentPrices[symbol] || { price: 0, changePercent: 0 };
+            document.getElementById('chartPrice').textContent = '$' + (currentData.price || 0).toLocaleString(undefined, { minimumFractionDigits: 2 });
+
+            const isPositive = (currentData.changePercent || 0) >= 0;
+            const changeSymbol = isPositive ? '↑' : '↓';
             const chartChangeEl = document.getElementById('chartChange');
-            chartChangeEl.className = 'price-change ' + changeClass;
-            chartChangeEl.textContent = changeSymbol + ' $' + Math.abs(change).toFixed(2) + ' (' + changeSymbol + Math.abs(changePercent).toFixed(2) + '%)';
-            
-            drawChart(symbol, change >= 0);
-            
+            chartChangeEl.className = 'price-change ' + (isPositive ? 'positive' : 'negative');
+            chartChangeEl.textContent = `${changeSymbol} ${Math.abs(currentData.changePercent || 0).toFixed(2)}%`;
+
+            drawChart(symbol, stockInfo.type);
+
             const watchlist = JSON.parse(localStorage.getItem('watchlist') || '[]');
             const btn = document.getElementById('watchlistBtn');
             if (watchlist.includes(symbol)) {
@@ -672,39 +778,55 @@
             }
         }
 
-        function drawChart(symbol, isPositive) {
+        async function drawChart(symbol, type = 'stock') {
             const canvas = document.getElementById('priceChart');
             const ctx = canvas.getContext('2d');
-            
+
             if (priceChart) {
                 priceChart.destroy();
             }
-            
+
             const timeRange = document.querySelector('.time-btn.active')?.textContent || '1M';
-            const dataPoints = 30;
-            
-            const labels = [];
-            const data = [];
-            const basePrice = stocksData.find(s => s.symbol === symbol)?.price || 100;
-            let price = basePrice * 0.95;
-            
-            for (let i = 0; i < dataPoints; i++) {
-                const volatility = 0.02;
-                const trend = isPositive ? 0.001 : -0.001;
-                const randomChange = (Math.random() - 0.5) * 2 * volatility;
-                price = price * (1 + trend + randomChange);
-                
-                data.push(price);
-                labels.push('Day ' + (i + 1));
+            let interval = '1h';
+            if (timeRange === '1D') interval = '5min';
+            if (timeRange === '1W') interval = '1h';
+            if (timeRange === '1M' || timeRange === '3M') interval = '1d';
+
+            const history = await marketService.getHistoricalData(symbol, type, interval);
+
+            if (!history || history.length === 0) {
+                const mockHistory = generateMockHistory(symbol, 24);
+                renderChart(ctx, symbol, mockHistory);
+                return;
             }
-            
+
+            renderChart(ctx, symbol, history);
+        }
+
+        function generateMockHistory(symbol, points) {
+            const currentPrice = marketService.currentPrices[symbol]?.price || 100;
+            const history = [];
+            let price = currentPrice * 0.95;
+            for (let i = 0; i < points; i++) {
+                price = price * (1 + (Math.random() - 0.48) * 0.02);
+                history.push({
+                    time: new Date(Date.now() - (points - i) * 3600000),
+                    price: price
+                });
+            }
+            return history;
+        }
+
+        function renderChart(ctx, symbol, history) {
+            const isPositive = history[history.length - 1].price >= history[0].price;
+
             const config = {
                 type: 'line',
                 data: {
-                    labels: labels,
+                    labels: history.map(d => d.time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })),
                     datasets: [{
                         label: symbol,
-                        data: data,
+                        data: history.map(d => d.price),
                         borderColor: isPositive ? '#00ff88' : '#ff4444',
                         backgroundColor: isPositive ? 'rgba(0, 255, 136, 0.1)' : 'rgba(255, 68, 68, 0.1)',
                         borderWidth: 2,
@@ -718,82 +840,73 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: {
-                            display: false
-                        },
+                        legend: { display: false },
                         tooltip: {
                             backgroundColor: 'rgba(26, 26, 46, 0.95)',
                             titleColor: '#00d4ff',
                             bodyColor: '#ffffff',
                             callbacks: {
-                                label: function(context) {
-                                    return '$' + context.parsed.y.toFixed(2);
-                                }
+                                label: (context) => '$' + context.parsed.y.toLocaleString(undefined, { minimumFractionDigits: 2 })
                             }
                         }
                     },
                     scales: {
                         x: {
-                            grid: {
-                                color: 'rgba(0, 212, 255, 0.1)'
-                            },
-                            ticks: {
-                                color: '#b3b3b3'
-                            }
+                            grid: { color: 'rgba(0, 212, 255, 0.1)' },
+                            ticks: { color: '#b3b3b3', maxRotation: 0, autoSkip: true, maxTicksLimit: 8 }
                         },
                         y: {
-                            grid: {
-                                color: 'rgba(0, 212, 255, 0.1)'
-                            },
+                            grid: { color: 'rgba(0, 212, 255, 0.1)' },
                             ticks: {
                                 color: '#b3b3b3',
-                                callback: function(value) {
-                                    return '$' + value.toFixed(2);
-                                }
+                                callback: (value) => '$' + value.toLocaleString()
                             }
                         }
                     }
                 }
             };
-            
+
             priceChart = new Chart(ctx, config);
         }
 
         function switchTab(tab) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             event.target.classList.add('active');
-            
+
+            let filtered = trackedSymbols;
             if (tab === 'watchlist') {
                 const watchlist = JSON.parse(localStorage.getItem('watchlist') || '[]');
-                const watchlistStocks = stocksData.filter(s => watchlist.includes(s.symbol));
-                populateStocksTable(watchlistStocks);
+                filtered = trackedSymbols.filter(s => watchlist.includes(s.symbol));
             } else if (tab === 'gainers') {
-                const gainers = [...stocksData].sort((a, b) => b.changePercent - a.changePercent);
-                populateStocksTable(gainers);
+                filtered = [...trackedSymbols].sort((a, b) => {
+                    const da = marketService.currentPrices[a.symbol]?.changePercent || 0;
+                    const db = marketService.currentPrices[b.symbol]?.changePercent || 0;
+                    return db - da;
+                });
             } else if (tab === 'losers') {
-                const losers = [...stocksData].sort((a, b) => a.changePercent - b.changePercent);
-                populateStocksTable(losers);
-            } else {
-                populateStocksTable(stocksData);
+                filtered = [...trackedSymbols].sort((a, b) => {
+                    const da = marketService.currentPrices[a.symbol]?.changePercent || 0;
+                    const db = marketService.currentPrices[b.symbol]?.changePercent || 0;
+                    return da - db;
+                });
             }
+            populateStocksTable(filtered);
         }
 
         function changeTimeRange(range) {
             document.querySelectorAll('.time-btn').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
-            
+
             const symbol = document.getElementById('chartSymbol').textContent;
-            const stock = stocksData.find(s => s.symbol === symbol);
-            if (stock) {
-                drawChart(symbol, stock.change >= 0);
-            }
+            const stock = trackedSymbols.find(s => s.symbol === symbol) || { type: 'stock' };
+            drawChart(symbol, stock.type);
         }
 
         function toggleWatchlist() {
             const btn = document.getElementById('watchlistBtn');
             const symbol = document.getElementById('chartSymbol').textContent;
             let watchlist = JSON.parse(localStorage.getItem('watchlist') || '[]');
-            
+
             if (watchlist.includes(symbol)) {
                 watchlist = watchlist.filter(s => s !== symbol);
                 btn.classList.remove('added');
@@ -805,7 +918,7 @@
                 btn.textContent = '★ In Watchlist';
                 alert(symbol + ' added to watchlist');
             }
-            
+
             localStorage.setItem('watchlist', JSON.stringify(watchlist));
         }
 
@@ -820,30 +933,19 @@
             const price = document.getElementById('chartPrice').textContent;
             alert('Sell order placed for ' + symbol + ' at ' + price);
         }
-        function searchStock() {
+        async function searchStock() {
             const term = document.getElementById('searchInput').value.trim().toUpperCase();
+            if (!term) return;
 
-            if (!term) {
-                populateStocksTable(stocksData);
-                return;
-            }
-
-            const results = stocksData.filter(
-                s =>
-                    s.symbol.includes(term) ||
-                    s.name.toUpperCase().includes(term)
-            );
-
-            if (results.length === 0) {
-                alert('No stocks found for: ' + term);
+            const data = await marketService.getStockPrice(term);
+            if (data) {
+                if (!trackedSymbols.find(s => s.symbol === term)) {
+                    trackedSymbols.unshift({ symbol: term, name: term, type: 'stock' });
+                }
+                populateStocksTable(trackedSymbols);
+                selectStock(term);
             } else {
-                populateStocksTable(results);
+                alert('Symbol not found: ' + term);
             }
         }
-
-        
-        window.onload = () => {
-            populateStocksTable();
-            selectStock('AAPL', 182.5, 4.2, 2.36);
-        };
-</script>
+    </script>
