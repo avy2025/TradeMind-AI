@@ -7,10 +7,12 @@
 class MarketService {
     constructor() {
         this.binanceWsUrl = 'wss://stream.binance.com:9443/ws';
+        this.backendWsUrl = 'ws://localhost:8000/ws/market';
         this.alphaVantageUrl = 'https://www.alphavantage.co/query';
         this.apiKey = localStorage.getItem('alpha_vantage_api_key') || 'demo';
         this.subscribers = new Set();
         this.binanceWs = null;
+        this.backendWs = null;
         this.currentPrices = {};
         this.priceHistory = {};
 
@@ -18,11 +20,45 @@ class MarketService {
         this.cryptoSymbols = ['btcusdt', 'ethusdt', 'bnbusdt', 'solusdt', 'xrpusdt'];
         this.stockSymbols = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA', 'NVDA', 'META', 'JPM'];
 
-        this.initBinance();
+        this.initBackend();
     }
 
-    // Initialize Binance WebSocket for crypto updates
+    // Initialize Connection to Python Backend
+    initBackend() {
+        try {
+            this.backendWs = new WebSocket(this.backendWsUrl);
+
+            this.backendWs.onopen = () => {
+                console.log('Connected to TradeMind Backend');
+            };
+
+            this.backendWs.onmessage = (event) => {
+                const message = JSON.parse(event.data);
+                if (message.type === 'all_prices') {
+                    Object.entries(message.data).forEach(([symbol, data]) => {
+                        this.updatePrice(symbol, data);
+                    });
+                }
+            };
+
+            this.backendWs.onclose = () => {
+                console.log('Backend WebSocket closed. Falling back to direct Binance stream...');
+                this.initBinance();
+            };
+
+            this.backendWs.onerror = () => {
+                console.warn('Backend unavailable. Using direct API fallback.');
+                this.initBinance();
+            };
+        } catch (e) {
+            this.initBinance();
+        }
+    }
+
+    // Initialize Binance WebSocket for crypto updates (Fallback)
     initBinance() {
+        if (this.binanceWs) return; // Already running
+
         const streams = this.cryptoSymbols.map(s => `${s}@ticker`).join('/');
         const url = `${this.binanceWsUrl}/${streams}`;
 
@@ -45,10 +81,6 @@ class MarketService {
         this.binanceWs.onclose = () => {
             console.log('Binance WebSocket closed. Reconnecting...');
             setTimeout(() => this.initBinance(), 5000);
-        };
-
-        this.binanceWs.onerror = (error) => {
-            console.error('Binance WebSocket error:', error);
         };
     }
 
@@ -138,23 +170,24 @@ class MarketService {
         }
     }
 
-    // Proxy for market indices using ETFs
-    async getMarketIndices() {
-        const indices = {
-            'SPY': 'S&P 500',
-            'DIA': 'Dow Jones',
-            'QQQ': 'NASDAQ',
-            'IWM': 'Russell 2000'
-        };
-
-        const results = {};
-        for (const [symbol, name] of Object.entries(indices)) {
-            const data = await this.getStockPrice(symbol);
-            if (data) {
-                results[name] = data;
-            }
+    // New: Fetch Trade Signal from Backend
+    async getSignal(symbol) {
+        try {
+            const response = await fetch(`http://localhost:8000/api/signals/${symbol}`);
+            return await response.json();
+        } catch (e) {
+            return { signal: 'NEUTRAL', reason: 'Backend offline' };
         }
-        return results;
+    }
+
+    // New: Fetch AI Insight from Backend
+    async getAIInsight(symbol) {
+        try {
+            const response = await fetch(`http://localhost:8000/api/ai/insight/${symbol}`);
+            return await response.json();
+        } catch (e) {
+            return { insight: 'Market data currently being analyzed by local models...' };
+        }
     }
 
     // Subscriber pattern to update UI components
@@ -166,15 +199,11 @@ class MarketService {
     notifySubscribers(symbol, data) {
         this.subscribers.forEach(callback => callback(symbol, data));
     }
-
-    // Helper to get formatted data for a table
-    getMarketOverview() {
-        return Object.entries(this.currentPrices).map(([symbol, data]) => ({
-            symbol,
-            ...data
-        }));
-    }
 }
+
+// Global instance
+window.marketService = new MarketService();
+
 
 // Global instance
 window.marketService = new MarketService();
