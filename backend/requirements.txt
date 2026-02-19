@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+websockets
+aiohttp
+pandas
+ta
+python-dotenv
+cryptography
