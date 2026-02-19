@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TradeMind AI - News</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            background: var(--primary-dark);
+            overflow-y: auto;
+        }
+
+        .news-wrapper {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: rgba(26, 26, 46, 0.95);
+            border-right: 1px solid rgba(0, 212, 255, 0.3);
+            padding: 20px;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .sidebar-logo {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: var(--neon-blue);
+            text-align: center;
+            margin-bottom: 30px;
+            text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+        }
+
+        .nav-menu {
+            list-style: none;
+        }
+
+        .nav-item {
+            margin-bottom: 10px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            background: rgba(0, 212, 255, 0.1);
+            color: var(--neon-blue);
+        }
+
+        .nav-icon {
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: 250px;
+            padding: 30px;
+        }
+
+        .news-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .news-card {
+            background: rgba(26, 26, 46, 0.6);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 15px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .news-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--neon-blue);
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.2);
+        }
+
+        .news-content {
+            padding: 20px;
+        }
+
+        .news-tag {
+            background: rgba(0, 212, 255, 0.2);
+            color: var(--neon-blue);
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.8em;
+            margin-bottom: 10px;
+            display: inline-block;
+        }
+
+        .news-title {
+            font-size: 1.2em;
+            color: var(--text-primary);
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .news-meta {
+            color: var(--text-secondary);
+            font-size: 0.85em;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .sentiment-badge {
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .sentiment-positive {
+            background: rgba(0, 255, 136, 0.1);
+            color: var(--success-green);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="news-wrapper">
+        <aside class="sidebar">
+            <div class="sidebar-logo">TradeMind AI</div>
+            <ul class="nav-menu">
+                <li class="nav-item"><a href="dashboard.html" class="nav-link"><span
+                            class="nav-icon">📊</span>Dashboard</a></li>
+                <li class="nav-item"><a href="markets.html" class="nav-link"><span class="nav-icon">💹</span>Markets</a>
+                </li>
+                <li class="nav-item"><a href="portfolio.html" class="nav-link"><span
+                            class="nav-icon">📈</span>Portfolio</a></li>
+                <li class="nav-item"><a href="assistant.html" class="nav-link"><span class="nav-icon">🤖</span>AI
+                        Analysis</a></li>
+                <li class="nav-item"><a href="news.html" class="nav-link active"><span
+                            class="nav-icon">📰</span>News</a></li>
+                <li class="nav-item"><a href="profile.html" class="nav-link"><span class="nav-icon">👤</span>Profile</a>
+                </li>
+                <li class="nav-item"><a href="index.html" class="nav-link" id="logoutBtn"><span
+                            class="nav-icon">🚪</span>Logout</a></li>
+            </ul>
+        </aside>
+        <main class="main-content">
+            <h1 style="color:var(--text-primary); margin-bottom:30px;">📰 Latest Market News</h1>
+            <div class="news-grid">
+                <div class="news-card">
+                    <div class="news-content">
+                        <span class="news-tag">TECH</span>
+                        <h3 class="news-title">NVIDIA Hits New All-Time High Amidst Growing AI Demand</h3>
+                        <div class="news-meta">
+                            <span>2 hours ago</span>
+                            <span class="sentiment-badge sentiment-positive">Bulllish</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- More cards can be added -->
+                <div class="news-card">
+                    <div class="news-content">
+                        <span class="news-tag">CRYPTO</span>
+                        <h3 class="news-title">Bitcoin Stability Above $90k Signals Long-term Confidence</h3>
+                        <div class="news-meta">
+                            <span>4 hours ago</span>
+                            <span class="sentiment-badge sentiment-positive">Bullish</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+
+</html>

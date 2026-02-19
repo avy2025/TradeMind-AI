@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -54,7 +55,8 @@
             transition: all 0.3s ease;
         }
 
-        .nav-link:hover, .nav-link.active {
+        .nav-link:hover,
+        .nav-link.active {
             background: rgba(0, 212, 255, 0.1);
             color: var(--neon-blue);
         }
@@ -177,7 +179,9 @@
             font-size: 0.9em;
         }
 
-        .form-group input, .form-group select, .form-group textarea {
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
             width: 100%;
             padding: 12px;
             background: rgba(15, 52, 96, 0.3);
@@ -188,7 +192,9 @@
             transition: all 0.3s ease;
         }
 
-        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
             outline: none;
             border-color: var(--neon-blue);
             box-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
@@ -350,7 +356,7 @@
             .sidebar {
                 transform: translateX(-100%);
             }
-            
+
             .main-content {
                 margin-left: 0;
             }
@@ -362,6 +368,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="profile-wrapper">
         <!-- Sidebar -->
@@ -381,19 +388,19 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="#" class="nav-link">
+                    <a href="portfolio.html" class="nav-link">
                         <span class="nav-icon">📈</span>
                         Portfolio
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="#" class="nav-link">
+                    <a href="assistant.html" class="nav-link">
                         <span class="nav-icon">🤖</span>
                         AI Analysis
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="#" class="nav-link">
+                    <a href="news.html" class="nav-link">
                         <span class="nav-icon">📰</span>
                         News
                     </a>
@@ -441,7 +448,7 @@
                 <!-- Personal Information -->
                 <div class="profile-section">
                     <h2 class="section-title">👤 Personal Information</h2>
-                    
+
                     <form id="profileForm">
                         <div class="form-group">
                             <label>First Name</label>
@@ -474,10 +481,12 @@
 
                         <div class="form-group">
                             <label>Bio</label>
-                            <textarea id="bio" disabled>Passionate trader focusing on tech stocks and AI-driven trading strategies. Looking to maximize portfolio returns through data-driven decisions.</textarea>
+                            <textarea id="bio"
+                                disabled>Passionate trader focusing on tech stocks and AI-driven trading strategies. Looking to maximize portfolio returns through data-driven decisions.</textarea>
                         </div>
 
-                        <button type="submit" class="save-btn" id="saveBtn" style="display: none;">💾 Save Changes</button>
+                        <button type="submit" class="save-btn" id="saveBtn" style="display: none;">💾 Save
+                            Changes</button>
                     </form>
                 </div>
 
@@ -486,7 +495,7 @@
                     <!-- Account Stats -->
                     <div class="profile-section">
                         <h2 class="section-title">📊 Account Stats</h2>
-                        
+
                         <div class="stats-mini-grid">
                             <div class="stat-mini-card">
                                 <div class="stat-mini-label">Total Trades</div>
@@ -510,7 +519,7 @@
                     <!-- Trading Preferences -->
                     <div class="profile-section" style="margin-top: 20px;">
                         <h2 class="section-title">⚙️ Trading Preferences</h2>
-                        
+
                         <div class="preference-item">
                             <div class="preference-header">
                                 <div>
@@ -563,7 +572,7 @@
                     <!-- Recent Activity -->
                     <div class="profile-section" style="margin-top: 20px;">
                         <h2 class="section-title">🕐 Recent Activity</h2>
-                        
+
                         <div class="activity-timeline">
                             <div class="activity-item">
                                 <div class="activity-dot"></div>
@@ -594,64 +603,64 @@
 
     <script>
         const fields = ["firstName", "lastName", "email", "phone", "experience", "bio"];
-    
+
         // Load profile data
         window.addEventListener('load', function () {
             const saved = JSON.parse(localStorage.getItem("profileData") || "{}");
-    
+
             fields.forEach(id => {
                 if (saved[id]) {
                     document.getElementById(id).value = saved[id];
                 }
             });
-    
+
             if (saved.firstName && saved.lastName) {
                 document.getElementById("profileName").textContent =
                     saved.firstName + " " + saved.lastName;
             }
-    
+
             if (saved.email) {
                 document.getElementById("profileEmail").textContent = saved.email;
             }
         });
-    
+
         // Enable edit mode
         function enableEdit() {
             const inputs = document.querySelectorAll('#profileForm input, #profileForm select, #profileForm textarea');
             inputs.forEach(input => input.disabled = false);
             document.getElementById('saveBtn').style.display = 'block';
         }
-    
+
         // Save profile
         document.getElementById('profileForm').addEventListener('submit', function (e) {
             e.preventDefault();
-    
+
             const data = {};
             fields.forEach(id => {
                 const el = document.getElementById(id);
                 data[id] = el.value;
                 el.disabled = true;
             });
-    
+
             localStorage.setItem("profileData", JSON.stringify(data));
-    
+
             document.getElementById("profileName").textContent =
                 data.firstName + " " + data.lastName;
-    
+
             document.getElementById("profileEmail").textContent = data.email;
-    
+
             document.getElementById('saveBtn').style.display = 'none';
-    
+
             alert("Profile updated successfully! ✅");
         });
-    
-       
+
+
         document.getElementById("editBtn").addEventListener("click", enableEdit);
-       //functionality for toggle switches
+        //functionality for toggle switches
         function toggleSwitch(element) {
             element.classList.toggle('active');
         }
-    
+
         document.getElementById('logoutBtn').addEventListener('click', function (e) {
             e.preventDefault();
             if (confirm('Are you sure you want to logout?')) {
@@ -661,6 +670,7 @@
                 window.location.href = 'index.html';
             }
         });
-    </script>    
+    </script>
 </body>
+
 </html>
