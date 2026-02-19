@@ -779,27 +779,30 @@
     portfolioChart.update('none'); // silent update
     }
 
-    function updateAIInsights() {
+    async function updateAIInsights() {
     const insightsContainer = document.querySelector('.ai-insights');
     const symbols = Object.keys(marketService.currentPrices);
     if (symbols.length === 0) return;
 
     const insights = [];
 
-    // Real-time analysis logic
-    symbols.forEach(s => {
-    const data = marketService.currentPrices[s];
-    if (data.changePercent > 2) {
+    // Fetch real signals from our new backend for key symbols
+    const trackingSymbols = ['AAPL', 'MSFT', 'TSLA', 'NVDA', 'BTCUSDT', 'ETHUSDT'];
+    for (const s of trackingSymbols) {
+    const signalData = await marketService.getSignal(s);
+    if (signalData && signalData.signal !== 'NEUTRAL') {
     insights.push({
-    title: 'Bullish Momentum',
-    icon: '🚀',
-    text: `${s} is surging! It's up ${data.changePercent.toFixed(2)}%. AI suggests trailing stop-loss.`
+    title: `${s} ${signalData.signal} Signal`,
+    icon: signalData.signal === 'BUY' ? '🚀' : '📉',
+    text: `${signalData.reason}. Analysis performed by TradeMind Backend.`
     });
-    } else if (data.changePercent < -2) { insights.push({ title: 'dip Detected' , icon: '📉' , text: `${s} is pulling
-        back. RSI indicates oversold levels. Possible buy opportunity.` }); } }); // Add default if no major moves if
-        (insights.length < 2) { insights.push({ title: 'Strategic Hold' , icon: '💎' ,
+    }
+    }
+
+    // Add default if no major moves
+    if (insights.length < 2) { insights.push({ title: 'Strategic Hold' , icon: '💎' ,
         text: 'Market volatility is low. Current portfolio allocation looks optimal for long-term growth.' }); } //
-        Render top 3 const items=insights.slice(0, 4); const html=items.map(item=> `
+        Render top items const items=insights.slice(0, 4); const html=items.map(item=> `
         <div class="insight-item">
             <div class="insight-title">
                 <span class="insight-icon">${item.icon}</span>
