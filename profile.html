@@ -543,30 +543,20 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="preference-item">
-                            <div class="preference-header">
-                                <div>
-                                    <div class="preference-title">Risk Alerts</div>
-                                    <div class="preference-text">Get notified about high-risk trades</div>
-                                </div>
-                                <div class="toggle-switch active" onclick="toggleSwitch(this)">
-                                    <div class="toggle-slider"></div>
-                                </div>
-                            </div>
+                    <!-- API Configurations -->
+                    <div class="profile-section" style="margin-top: 20px;">
+                        <h2 class="section-title">🔑 API Configurations</h2>
+                        <div class="form-group">
+                            <label>Anthropic API Key (for AI Analyst)</label>
+                            <input type="password" id="anthropicKey" placeholder="sk-ant-...">
                         </div>
-
-                        <div class="preference-item">
-                            <div class="preference-header">
-                                <div>
-                                    <div class="preference-title">Auto-Trading</div>
-                                    <div class="preference-text">Enable AI-powered auto trading</div>
-                                </div>
-                                <div class="toggle-switch" onclick="toggleSwitch(this)">
-                                    <div class="toggle-slider"></div>
-                                </div>
-                            </div>
+                        <div class="form-group">
+                            <label>Alpha Vantage Key (for Stocks)</label>
+                            <input type="password" id="alphaVantageKey" placeholder="Enter key for live stocks">
                         </div>
+                        <button class="save-btn" onclick="saveAPIKeys()">💾 Update API Keys</button>
                     </div>
 
                     <!-- Recent Activity -->
@@ -604,7 +594,7 @@
     <script>
         const fields = ["firstName", "lastName", "email", "phone", "experience", "bio"];
 
-        // Load profile data
+        // Load profile and API data
         window.addEventListener('load', function () {
             const saved = JSON.parse(localStorage.getItem("profileData") || "{}");
 
@@ -613,6 +603,10 @@
                     document.getElementById(id).value = saved[id];
                 }
             });
+
+            // Load API Keys
+            document.getElementById('anthropicKey').value = localStorage.getItem('anthropic_api_key') || '';
+            document.getElementById('alphaVantageKey').value = localStorage.getItem('alpha_vantage_api_key') || '';
 
             if (saved.firstName && saved.lastName) {
                 document.getElementById("profileName").textContent =
@@ -623,6 +617,17 @@
                 document.getElementById("profileEmail").textContent = saved.email;
             }
         });
+
+        // Save API Keys
+        function saveAPIKeys() {
+            const antKey = document.getElementById('anthropicKey').value.trim();
+            const avKey = document.getElementById('alphaVantageKey').value.trim();
+
+            if (antKey) localStorage.setItem('anthropic_api_key', antKey);
+            if (avKey) localStorage.setItem('alpha_vantage_api_key', avKey);
+
+            alert("API Keys updated successfully! 🔑");
+        }
 
         // Enable edit mode
         function enableEdit() {

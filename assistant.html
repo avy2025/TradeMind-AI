@@ -644,13 +644,20 @@
                 }
 
                 // Default to Claude API as before
+                const apiKey = localStorage.getItem('anthropic_api_key');
+                if (!apiKey) {
+                    throw new Error("Missing API Key");
+                }
+
                 const response = await fetch("https://api.anthropic.com/v1/messages", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
+                        "x-api-key": apiKey,
+                        "anthropic-version": "2023-06-01"
                     },
                     body: JSON.stringify({
-                        model: "claude-sonnet-4-20250514",
+                        model: "claude-3-sonnet-20240229",
                         max_tokens: 1000,
                         messages: [
                             {
@@ -683,6 +690,9 @@ Provide a helpful, educational response in a friendly tone.`
                 }
             } catch (error) {
                 console.error("API Error:", error);
+                if (error.message === "Missing API Key") {
+                    return "To use the full potential of the AI Analyst, please go to your **Profile** page and enter your **Anthropic API Key** in the API Configurations section. 🔑\n\nWithout a key, I can only provide limited information based on my offline knowledge base.";
+                }
                 return getFallbackResponse(userMessage);
             }
         }
