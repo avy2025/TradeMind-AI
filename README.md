@@ -8,6 +8,20 @@ TradeMind AI is a powerful, intelligent trading assistant platform with a futuri
 - **AI Insights**: Automated market trend analysis and risk alerts.
 - **AI Assistant**: Conversational interface for trading education and strategy advice.
 
+## 🧠 Reinforcement Learning Trading Agent
+
+**Algorithm:**
+PPO (Stable-Baselines3)
+
+**Features:**
+- Custom Gym trading environment
+- Technical indicators (RSI, MACD)
+- RL agent training pipeline
+- Portfolio evaluation metrics
+
+**Performance Plots:**
+![Evaluation Plots](evaluation_plots.png)
+
 ## 🛠️ Technical Stack
 - **Frontend**: HTML5, Vanilla CSS3 (Custom Design System), JavaScript (ES6+).
 - **Backend**: Python 3.10+, FastAPI, Uvicorn (Asynchronous Server).
