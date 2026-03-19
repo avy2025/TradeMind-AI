@@ -2,10 +2,10 @@ import yaml
 import os
 from stable_baselines3.common.vec_env import DummyVecEnv
 
-from data.load_data import load_csv_data, generate_sample_data
-from indicators.indicators import add_technical_indicators
-from rl_trading.trading_env import TradingEnv
-from rl_trading.agent import create_agent, train_agent, save_agent
+from backend.data.load_data import load_csv_data, generate_sample_data
+from backend.indicators.indicators import add_technical_indicators
+from backend.core.trading_env import TradingEnv
+from backend.core.agent import create_agent, train_agent, save_agent
 
 def run_training():
     """

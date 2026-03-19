@@ -3,11 +3,11 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 
-from data.load_data import load_csv_data
-from indicators.indicators import add_technical_indicators
-from rl_trading.trading_env import TradingEnv
-from rl_trading.agent import load_agent
-from utils.metrics import calculate_sharpe_ratio, calculate_max_drawdown, calculate_total_return
+from backend.data.load_data import load_csv_data
+from backend.indicators.indicators import add_technical_indicators
+from backend.core.trading_env import TradingEnv
+from backend.core.agent import load_agent
+from backend.utils.metrics import calculate_sharpe_ratio, calculate_max_drawdown, calculate_total_return
 
 def run_evaluation():
     """
