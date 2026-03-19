@@ -1,5 +1,24 @@
 # Trading System Configuration
-initial_cash: 10000
-transaction_cost: 0.001
-training_timesteps: 100000
-window_size: 10
+
+# General parameters
+agent:
+  initial_cash: 10000
+  training_timesteps: 100000
+
+# Environment parameters
+environment:
+  window_size: 10
+  transaction_cost: 0.001
+
+# Data configuration (to be added)
+data:
+  symbols: ["AAPL", "GOOGL", "MSFT"]
+  timeframe: "1d"
+  source: "yfinance"
+
+# Model parameters
+model:
+  algorithm: "PPO"
+  policy: "MlpPolicy"
+  learning_rate: 0.0003
+  batch_size: 64

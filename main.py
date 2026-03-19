@@ -1,8 +1,8 @@
 import argparse
 import sys
 
-from rl_trading.train_agent import run_training
-from rl_trading.evaluate_agent import run_evaluation
+from backend.core.train_agent import run_training
+from backend.core.evaluate_agent import run_evaluation
 
 def main():
     """

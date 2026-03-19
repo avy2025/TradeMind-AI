@@ -5,3 +5,9 @@ numpy
 matplotlib
 ta
 pyyaml
+fastapi
+uvicorn
+websockets
+aiohttp
+python-dotenv
+cryptography
