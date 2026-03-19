@@ -36,24 +36,36 @@ PPO (Stable-Baselines3)
 
 ### Backend Setup
 1. Navigate to the project root.
-2. Install dependencies: `pip install -r backend/requirements.txt`
-3. Run the backend server: `python -m uvicorn backend.main:app --reload`
+2. Install dependencies: `pip install -r requirements.txt`
+3. Run the backend server: `uvicorn backend.app.main:app --reload`
 4. The backend will be available at `http://localhost:8000`.
 
+### RL Training & Evaluation
+- **Train Agent**: `python main.py --mode train`
+- **Evaluate Agent**: `python main.py --mode evaluate`
+- Models are saved in `models/` and plots in `evaluation_plots.png`.
+
 ### Frontend Setup
-1. Open `index.html` in your browser.
+1. Open `frontend/index.html` in your browser.
 2. Sign up or log in to access the dashboard.
-3. **API Setup**: The platform uses Alpha Vantage for stock data. You can update the API key in `market-service.js` or via `localStorage.setItem('alpha_vantage_api_key', 'YOUR_KEY')`.
+3. **API Setup**: Update the API key in `frontend/scripts/market-service.js` or via `localStorage`.
 
 ## 🤖 Architecture
-The project follows a modern full-stack architecture:
+The project follows a modern modular full-stack architecture:
+
+- **Frontend (`/frontend`)**:
+  - `scripts/market-service.js`: Unified service for WebSocket and API fallback.
+  - HTML files: `dashboard.html`, `assistant.html`, `markets.html`, etc.
 - **Backend (`/backend`)**:
-  - `main.py`: FastAPI application with WebSocket streaming.
-  - `services.py`: Logic for market data fetching, technical signals (RSI/SMA), and AI sentiment analysis.
-- **Frontend**:
-  - `market-service.js`: Unified service that connects to the backend WebSocket with a direct API fallback.
-  - `dashboard.html`: Real-time portfolio, P&L tracking, and AI-driven trade signals.
-  - `assistant.html`: Interactive AI knowledge base powered by backend intelligence.
+  - `app/`: FastAPI application (`main.py`) and business services (`services.py`).
+  - `core/`: Reinforcement learning agent logic and trading environment.
+  - `data/`: Data loading and CSV management.
+  - `indicators/`: Technical indicator calculations.
+  - `utils/`: Common Python utilities.
+- **Data & Models**:
+  - `/data`: Historical stock data (e.g., `sample_data.csv`).
+  - `/models`: Saved RL agent model artifacts.
+- **Config**: `/configs/config.yaml` manages system-wide parameters.
 
 ---
 *Disclaimer: TradeMind AI is for educational and experimental purposes. Always practice risk management when trading live markets.*
